@@ -192,6 +192,9 @@ ipw_atet_table <-
         )
     )
 
+# export table with ATEs
+ipw_atet_table %>% readr::write_csv("output/tables/ipw_atet_table.csv")
+
 # export booktabs table
 ipw_atet_table %>%
     select("age group" = age, "time relative to treatment" = m, effect, se) %>%
@@ -218,7 +221,6 @@ ggplot(ipw_atet_table, aes(x = m, y = effect, color = age)) +
     theme_bw(base_size = 20) +
     xlab("Months") +
     ylab("ATE") +
-    ggtitle("ATEs over 24 months by age group") +
     scale_color_manual(values = c("blue", "red"))
 
 ggsave("output/figures/ATEs_over_24_months_by_age_group.png")
