@@ -131,6 +131,7 @@ tibble(
   `Lower Bound` = atet - 1.96 * atet_sd$sd,
   `Upper Bound` = atet + 1.96 * atet_sd$sd
 ) %>%
+mutate(across(everything(), ~ round(., 3))) %>% # round all columns to 3 digits
   kableExtra::kbl(
     "latex", booktabs = TRUE, 
     caption = "Internet access and employment: Non-parametric bootstrap estimates of ATET",
@@ -218,7 +219,7 @@ common_trends <- data %>%
                                             `1` = "Connected = 1"))
 
 # Plot
-ggplot(data = common_trends, 
+common_trends_plot <- ggplot(data = common_trends, 
        aes(x = time, y = educ_high_mean, 
            group = connected, 
            color = connected)) + 
@@ -228,14 +229,15 @@ ggplot(data = common_trends,
   theme_bw(base_size = 20) +
   labs( y ="Share of highly educated", x= "Time", colour = "Group")
 
-ggsave("output/figures/2_common_trends.png", width = 10, height = 6, dpi = 300)
+ggsave("output/figures/2_common_trends.png", common_trends_plot, width = 10, height = 6, dpi = 300)
 
 # question (b): event study plot
 
 event_study <- feols(educ_high ~ i(time, connected, 0) | time + location, data)
 
-iplot(event_study) 
-ggsave("output/figures/2_event_study.png", width = 10, height = 6, dpi = 300)
+png(file="output/figures/2_event_study.png",width=10, height=6, units="in", res=300)
+iplot(event_study)
+dev.off()
 
 # --------------------------------------------------------------
 # Question 4: Clustered Bootstrap SEs
@@ -274,6 +276,7 @@ tibble(
   `Lower Bound` = atet - 1.96 * atet_sd_boot$sd,
   `Upper Bound` = atet + 1.96 * atet_sd_boot$sd
 ) %>%
+mutate(across(everything(), ~ round(., 3))) %>% # round all columns to 3 digits
   kableExtra::kbl(
     "latex", booktabs = TRUE, 
     caption = "Internet access and employment: Non-parametric bootstrap estimates of ATET, Cluster-robust SEs",
