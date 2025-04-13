@@ -38,7 +38,7 @@ raw.data %>%
         ) %>%
     kableExtra::kable("latex", escape = F, booktabs = TRUE, digits = 3, caption = "Share of Age Groups by Treatment Status") %>%
     kableExtra::kable_styling(latex_options = "hold_position") %>%
-    writeLines("output/tables/share_table.tex")
+    writeLines("output/tables/1_share_table.tex")
 
 # Compute standardized bias and difference in means with p-value
 
@@ -84,7 +84,7 @@ balance_table <- tibble(
 balance_table %>%
     kableExtra::kable("latex", booktabs = TRUE, digits = 3, caption = "Balance Metrics") %>%
     kableExtra::kable_styling(latex_options = "hold_position") %>%
-    writeLines("output/tables/balance_table.tex")
+    writeLines("output/tables/1_balance_table.tex")
 
 # --------------------------------------------------------------
 # Question 2: IPW ATE estimation by age group
@@ -193,14 +193,14 @@ ipw_atet_table <-
     )
 
 # export table with ATEs
-ipw_atet_table %>% readr::write_csv("output/tables/ipw_atet_table.csv")
+ipw_atet_table %>% readr::write_csv("output/tables/1_ipw_atet_table.csv")
 
 # export booktabs table
 ipw_atet_table %>%
     select("age group" = age, "time relative to treatment" = m, effect, se) %>%
     kableExtra::kable("latex", booktabs = TRUE, digits = 3, caption = "Program and Employment: Semiparametric ATE with IPW") %>%
     kableExtra::kable_styling(latex_options = "hold_position") %>%
-    writeLines("output/tables/ipw_atet_table.tex")
+    writeLines("output/tables/1_ipw_atet_table.tex")
 
 # --------------------------------------------------------------
 # Question 3: Plot ATEs and Interpretation
@@ -223,7 +223,7 @@ ggplot(ipw_atet_table, aes(x = m, y = effect, color = age)) +
     ylab("ATE") +
     scale_color_manual(values = c("blue", "red"))
 
-ggsave("output/figures/ATEs_over_24_months_by_age_group.png")
+ggsave("output/figures/1_ATEs_over_24_months_by_age_group.png")
 
 # --------------------------------------------------------------
 # End of script
