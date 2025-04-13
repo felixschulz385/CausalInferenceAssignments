@@ -1,0 +1,114 @@
+\documentclass{scrartcl}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{titling}
+\usepackage{xcolor}
+
+\setlength{\droptitle}{-7.5em}
+
+\title{Causal Inference for Policy Evaluation\\
+\Large{Assignment 2}}
+\author{Marco Gortan, Felix Schulz, Benjamin Weggelaar}
+\date{\today}
+
+\newcommand{\marco}[1]{\textcolor{red}{#1}}
+\newcommand{\felix}[1]{\textcolor{cyan}{#1}}
+\newcommand{\benji}[1]{\textcolor{green}{#1}}
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;} 
+
+\begin{document}
+
+\maketitle
+
+\section*{Question 1}
+
+\subsection*{(a) Non-parametric ATET estimate with bootstrap standard error}
+
+% Insert results table or output
+\input{output/tables/2_np_atet}
+
+\subsection*{(b) Parametric ATET estimate (no fixed effects, no clustering)}
+
+\input{output/tables/2_parametric_atet_combined}
+
+\subsubsection*{i. Comparison of point estimates}
+
+% Is the point estimate from point (b) similar to the one in point (a)? Should we expect them to be similar? 
+
+\subsubsection*{ii. Comparison of standard errors}
+
+% Is the std. error from point (b) similar to the one in point (a)? Should we expect them to be similar?
+
+\subsection*{(c) Parametric ATET with clustered standard errors}
+
+% Compare the std. errors to points (a) and (b).
+
+\subsection*{(d) Parametric ATET with fixed effects and clustered SEs}
+
+% Is the point estimate for the treatment effect similar to the non-parametric estimate? Should we expect them to be similar? What could be driving the difference?
+
+\section*{Question 2}
+
+\subsection*{(a) Should we control for 'skilled'?}
+
+% Do you think that is a good idea to control for the dummy for being skilled? Explain.
+
+\subsection*{(b) Controlling for 'skilled' in the regression}
+
+\input{output/tables/2_parametric_atet_skilled}
+
+% Compare the result with the estimate from point 1.d. and comment
+
+\section*{Question 3}
+
+\subsection*{(a) Common trends plot}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{output/figures/2_common_trends.png}
+    \caption{Common trends for education}
+    \label{fig:commontrends}
+\end{figure}
+
+% Provide a possible explanation for the trends you observe.
+
+\subsection*{(b) Event study}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{output/figures/2_event_study.png}
+    \caption{Event study: education}
+    \label{fig:eventstudy}
+\end{figure}
+
+% Conduct an event study for the outcome educ high and report the results in a plot. Based on the results from this and the last question, is it reasonable to use a DiD strategy for this outcome variable?
+
+\subsection*{(c) Bias direction in DiD estimate for education}
+
+% Given the common trend plot above, if you were to estimate the effect of fast internet using a DiD strategy, can we say whether our estimate would be up-ward or downward biased? 
+
+\section*{Question 4}
+
+\subsection*{(a) Clustered bootstrap SE for non-parametric ATET}
+
+\input{output/tables/2_np_atet_cluster}
+
+% Is the result similar to that in point 1.c?
+
+\section*{Question 5}
+
+\subsection*{(a) Endogeneity concern in regressing labor supply on children}
+
+% Why can’t we just regress female labour supply on the number of children to estimate a causal effect?
+
+\subsection*{(b) IV estimate and treatment interpretation}
+
+% The IV strategy of the authors only identifies a very specific average treatment effect. What is that? Be precise and context-specific
+
+\subsection*{(c) Why IV > OLS for effect magnitude?}
+
+% Consider columns 1 and 2 in Table 7, which presents OLS and IV estimates, respectively. Provide an explanation for why the OLS estimate are lower than the IV ones (i.e. OLS over-estimates the negative effect).
+
+\end{document}
