@@ -4,20 +4,22 @@
 \begin{center}
 \begin{tabular}{l c c c}
 \hline
- & No fixed effects, no clustered SE & No fixed effects, clustered SE & Fixed effects, clustered SE \\
+ & (b) & (c) & d \\
 \hline
-Intercept               & $0.719 \; (0.001)^{***}$  & $0.719 \; (0.004)^{***}$  &                         \\
-Connected               & $0.048 \; (0.003)^{***}$  & $0.048 \; (0.010)^{***}$  &                         \\
-Submarines              & $-0.040 \; (0.002)^{***}$ & $-0.040 \; (0.004)^{***}$ &                         \\
-Treatment               & $0.008 \; (0.005)$        & $0.008 \; (0.010)$        & $0.022 \; (0.008)^{**}$ \\
+Intercept             & $0.719^{***}$  & $0.719^{***}$  &              \\
+                      & $(0.001)$      & $(0.004)$      &              \\
+Connected             & $0.048^{***}$  & $0.048^{***}$  &              \\
+                      & $(0.003)$      & $(0.010)$      &              \\
+Submarines            & $-0.040^{***}$ & $-0.040^{***}$ &              \\
+                      & $(0.002)$      & $(0.004)$      &              \\
+Treatment             & $0.008$        & $0.008$        & $0.022^{**}$ \\
+                      & $(0.005)$      & $(0.010)$      & $(0.008)$    \\
 \hline
-Num. obs.               & $280641$                  & $280641$                  & $280641$                \\
-R$^2$ (full model)      & $0.003$                   & $0.003$                   & $0.138$                 \\
-R$^2$ (proj model)      & $$                        & $$                        & $0.000$                 \\
-Adj. R$^2$ (full model) & $0.003$                   & $0.003$                   & $0.128$                 \\
-Adj. R$^2$ (proj model) & $$                        & $$                        & $0.000$                 \\
-Num. groups: time       & $$                        & $$                        & $10$                    \\
-Num. groups: location   & $$                        & $$                        & $3169$                  \\
+Fixed Effects         &                &                & $\checkmark$ \\
+Clustered SEs         &                & $\checkmark$   & $\checkmark$ \\
+Num. obs.             & $280641$       & $280641$       & $280641$     \\
+Num. groups: time     & $$             & $$             & $10$         \\
+Num. groups: location & $$             & $$             & $3169$       \\
 \hline
 \multicolumn{4}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}
 \end{tabular}

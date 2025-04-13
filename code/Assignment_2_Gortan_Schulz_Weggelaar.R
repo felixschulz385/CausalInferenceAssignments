@@ -126,10 +126,10 @@ atet_sd <- bootstrap.np(data, "employed", 10)
 
 # Export in table format
 tibble(
-  atet = atet,
-  sd = atet_sd$sd,
-  lower_bound = atet - 1.96 * atet_sd$sd,
-  upper_bound = atet + 1.96 * atet_sd$sd
+  ATET = atet,
+  SD = atet_sd$sd,
+  `Lower Bound` = atet - 1.96 * atet_sd$sd,
+  `Upper Bound` = atet + 1.96 * atet_sd$sd
 ) %>%
   kableExtra::kbl(
     "latex", booktabs = TRUE, 
@@ -163,13 +163,19 @@ texreg::texreg(list(did1, did2, did3),
                                         2*pnorm(-abs(coef(did2)/sqrt(diag(vcov_did2)))),
                                         2*pnorm(-abs(coef(did3)/sqrt(diag(vcov_did3))))),
                 custom.coef.names = c("Intercept", "Connected", "Submarines", "Treatment"),
-                custom.model.names = c("No fixed effects, no clustered SE", 
-                                       "No fixed effects, clustered SE",
-                                       "Fixed effects, clustered SE"),
+                custom.model.names = c("(b)", "(c)", "d"),
+                custom.gof.rows = list(
+                  "Fixed Effects" = c("", "", "$\\checkmark$"),
+                  "Clustered SEs" = c("", "$\\checkmark$", "$\\checkmark$")
+                  ),
+                include.rsquared = FALSE,
+                include.adjrs = FALSE,
+                include.nobs = TRUE,
+                include.rmse = FALSE,
                 caption = "Parametric ATET estimates",
                 caption.above = TRUE,
                 stars = c(0.001, 0.01, 0.05),
-                single.row = TRUE,
+                single.row = FALSE,
                 digits = 3,
                 file = "output/tables/2_parametric_atet_combined.tex",
                 )
@@ -178,7 +184,6 @@ texreg::texreg(list(did1, did2, did3),
 # Question 2: Adding Skilled to the regression
 # --------------------------------------------------------------
 
-# question (b)
 did4 <- feols(employed ~ treatment + skilled | time + location, data)
 vcov_did4 <- vcovCL(did4, cluster = ~ location)
 
@@ -186,6 +191,10 @@ texreg::texreg(list(did4),
                 custom.coef.names = c("Treatment", "Skilled"),
                 custom.model.names = c("Fixed effects, clustered SE"),
                 custom.model.numbers = c("1"),
+                include.rsquared = FALSE,
+                include.adjrs = FALSE,
+                include.nobs = TRUE,
+                include.rmse = FALSE,
                 caption = "Parametric ATET, with fixed effects, controlling ofr skill and clustered SE",
                 caption.above = TRUE,
                 stars = c(0.001, 0.01, 0.05),
@@ -256,14 +265,14 @@ bootstrap.cluster.np <- function(data, outcome_var, cluster_var, n_iter){
 }
 
 
-atet_sd <- bootstrap.cluster.np(data, "employed", "location", 10)
+atet_sd_boot <- bootstrap.cluster.np(data, "employed", "location", 10)
 
 # Export in table format
 tibble(
-  atet = atet,
-  sd = atet_sd$sd,
-  lower_bound = atet - 1.96 * atet_sd$sd,
-  upper_bound = atet + 1.96 * atet_sd$sd
+  ATET = atet,
+  SD = atet_sd_boot$sd,
+  `Lower Bound` = atet - 1.96 * atet_sd_boot$sd,
+  `Upper Bound` = atet + 1.96 * atet_sd_boot$sd
 ) %>%
   kableExtra::kbl(
     "latex", booktabs = TRUE, 
