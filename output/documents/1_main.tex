@@ -3,11 +3,15 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{booktabs}
+\usepackage{titling}
 
-\title{Causal Inference for Policy Evaluation}
-\subtitle{Assignment 1}
+\setlength{\droptitle}{-7.5em}       % This is your set screw.
+
+
+\title{Causal Inference for Policy Evaluation\\
+\Large{Assignment 1}}
 \author{Marco Gortan, Felix Schulz, Benjamin Weggelaar}
-\date{March 2025}
+\date{\today}
 
 \usepackage{xcolor}
 
@@ -19,6 +23,7 @@
 \begin{document}
 
 \maketitle
+
 
 \section*{Question 1}
 
@@ -32,20 +37,25 @@ Here, we test the $H_0$ that the difference in means between the treatment and c
 
 \section*{Question 2}
 
-TODO: Briefly discuss results of analysis
+We leave the interpretation of the results to Q3.
+
 
 \section*{Question 3}
 
-TODO: Provide interpretation of figure in PDF
+Figure \ref{fig:ATE} shows the evolution of the Average Treatment Effect (ATE) over time for the two groups of people, below and above 40 years old. Confidence bands are at the 95\% confidence level. 
+
+We notice that ATE is negative and significant one month after the implementation of the program, but it quickly turns positive, reaching a maximum level after four (five) months for the group of people below (above) 40 (50) years old. At the peak, treated people are between 35\% and 45\% more likely to be employment after four to five months. 
+
+The effect is, however, temporary, and decreases to zero 24 months after the implementation of the program, for both the groups. In general, the program seems to have been more successful for older people above 40.  
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\linewidth]{output/figures/ATEs_over_24_months_by_age_group.png}
+    \includegraphics[width=0.7\linewidth]{output/figures/1_ATEs_over_24_months_by_age_group.png}
     \caption{Program and Employment: ATEs over 24 months by age group}
-    \label{fig:enter-label}
+    \label{fig:ATE}
 \end{figure}
 
-The ATET describes the treatment effect for those that end up treated. Here, treatment assignment is not random and there may be selection into treatment. We use propensity score matching to calculate a valid counterfactual given the covariates of the entire sample assuming we observe all confounders. By pivoting from the ATE to ATET we would be estimating a counterfactual for the treated alone. If the treatment group differs from the non-treated in their potential outcome, they are not the same.
+ATET refers to the average treatment effect for those that end up treated. If the treatment group differs from the non-treated in their potential outcome, ATE and ATET are not the same. Note that the idea of the inverse probability weighting is to reweigh the groups of the treated and non-treated according to the observed characteristics, but there might be other factors that have not been taken into account, are related to the probability of ending up treated, and potentially explain the employment situation.   
 
 \section*{Question 4}
 
@@ -65,8 +75,8 @@ If treatment impacted the outcomes of the control group in the other direction, 
 
 %The treatment group is defined as the locations $j$ in the 10km x 10km grid cell that are connected to the backbone network and are in countries that will be connected to at least one submarine cable. Therefore, the control group is defined as those locations $j$ that are not connected to the backbone network. \\
 
-\marco{The treatment group includes all locations that gain access to fast Internet in a given quarter or year. Specifically, these are locations situated within 500 meters of the national backbone network at the time when that backbone becomes connected to at least one submarine Internet cable. \\
-The control group, by contrast, consists of locations that are farther than 500 meters from the backbone network and therefore are not directly exposed to fast Internet when the submarine cable arrives.} \\
+The treatment group includes all locations that gain access to fast Internet in a given quarter or year. Specifically, these are locations situated within 500 meters of the national backbone network at the time when that backbone becomes connected to at least one submarine Internet cable. \\
+The control group, by contrast, consists of locations that are farther than 500 meters from the backbone network and therefore are not directly exposed to fast Internet when the submarine cable arrives.\\
 
 The post-treatment period starts at time period $t$ at which country $c$'s backbone network is connected to at least one submarine cable. The pre-treatment period is thus the time period before the network has been connected. \\
 
