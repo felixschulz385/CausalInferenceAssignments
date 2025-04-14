@@ -5,6 +5,8 @@
 \usepackage{booktabs}
 \usepackage{titling}
 \usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amsfonts}
 % 
 
 \setlength{\droptitle}{-7.5em}
@@ -26,7 +28,6 @@
 
 \subsection*{(a) Non-parametric ATET estimate with bootstrap standard error}
 
-% Insert results table or output
 \input{output/tables/2_np_atet}
 
 \subsection*{(b) Parametric ATET estimate (no fixed effects, no clustering)}
@@ -35,19 +36,19 @@
 
 \subsubsection*{i. Comparison of point estimates}
 
-% Is the point estimate from point (b) similar to the one in point (a)? Should we expect them to be similar? 
+The parametrically estimated effects are identical until at least the fourth decimal position. This is to be expected since both are calculating the same two differences: In the parametric model, $\text{Connected}$ captures the trend before and after treatment across all groups, while $\text{Submarines}$ captures the difference between treatment and control group shared across periods. In the nonparametric approach we are explicitly calculating these two differences (first $\tilde{Y}_i = \bar{Y}_{i,1} - \bar{Y}_{i,0}$ and then $\tilde{Y}_1 - \tilde{Y}_0$).
 
 \subsubsection*{ii. Comparison of standard errors}
 
-% Is the std. error from point (b) similar to the one in point (a)? Should we expect them to be similar?
+Standard errors differ substantially. This is 
 
 \subsection*{(c) Parametric ATET with clustered standard errors}
 
-% Compare the std. errors to points (a) and (b).
+Accounting for heteroskedasticity, these standard errors are substantially larger than the previous estimates.
 
 \subsection*{(d) Parametric ATET with fixed effects and clustered SEs}
 
-% Is the point estimate for the treatment effect similar to the non-parametric estimate? Should we expect them to be similar? What could be driving the difference?
+The point estimate is larger than the non-parametric estimate. The fixed effect approach used here uses the within estimator, focusing on within-location variation, addionally accounting for temporal trends with annual fixed effects instead of the period dummy. The remaining variation after demeaning significantly differs and thereby also the coefficients. If treatment was truly randomly assigned there would be no differences in the unobservables FE accounts for and in expectation both are unbiased estimators of the ATET. The difference suggest that there might be selection into treatment based on confounders accounted for by FE estimation.
 
 \section*{Question 2}
 
@@ -107,7 +108,7 @@
 
 % The IV strategy of the authors only identifies a very specific average treatment effect. What is that? Be precise and context-specific
 
-\subsection*{(c) Why IV > OLS for effect magnitude?}
+\subsection*{(c) Why OLS over-estimate the negativ effect?}
 
 % Consider columns 1 and 2 in Table 7, which presents OLS and IV estimates, respectively. Provide an explanation for why the OLS estimate are lower than the IV ones (i.e. OLS over-estimates the negative effect).
 
