@@ -153,20 +153,29 @@ vcov_did2 <- vcovCL(did2, cluster = ~ location)
 did3 <- feols(employed ~ treatment | time + location, data)
 vcov_did3 <- vcovCL(did3, cluster = ~ location)
 
+# --------------------------------------------------------------
+# Question 2: Adding Skilled to the regression
+# --------------------------------------------------------------
+
+did4 <- feols(employed ~ treatment + skilled | time + location, data)
+vcov_did4 <- vcovCL(did4, cluster = ~ location)
+
 # combine all in one table
 
-texreg::texreg(list(did1, did2, did3), 
+texreg::texreg(list(did1, did2, did3, did4), 
                 override.se = list(sqrt(diag(vcov_did1)),
                                    sqrt(diag(vcov_did2)),
-                                   sqrt(diag(vcov_did3))),
+                                   sqrt(diag(vcov_did3)),
+                                   sqrt(diag(vcov_did4))),
                 override.pvalues = list(2*pnorm(-abs(coef(did1)/sqrt(diag(vcov(did1))))),
                                         2*pnorm(-abs(coef(did2)/sqrt(diag(vcov_did2)))),
-                                        2*pnorm(-abs(coef(did3)/sqrt(diag(vcov_did3))))),
-                custom.coef.names = c("Intercept", "Connected", "Submarines", "Treatment"),
-                custom.model.names = c("(b)", "(c)", "(d)"),
+                                        2*pnorm(-abs(coef(did3)/sqrt(diag(vcov_did3)))),
+                                        2*pnorm(-abs(coef(did4)/sqrt(diag(vcov_did4))))),
+                custom.coef.names = c("Intercept", "Connected", "Submarines", "Treatment", "Skilled"),
+                custom.model.names = c("(1b)", "(1c)", "(1d)", "(2)"),
                 custom.gof.rows = list(
-                  "Fixed Effects" = c("", "", "$\\checkmark$"),
-                  "Clustered SEs" = c("", "$\\checkmark$", "$\\checkmark$")
+                  "Fixed Effects" = c("", "", "$\\checkmark$", "$\\checkmark$"),
+                  "Clustered SEs" = c("", "$\\checkmark$", "$\\checkmark$", "$\\checkmark$")
                   ),
                 include.rsquared = FALSE,
                 include.adjrs = FALSE,
@@ -179,29 +188,6 @@ texreg::texreg(list(did1, did2, did3),
                 digits = 4,
                 file = "output/tables/2_parametric_atet_combined.tex",
                 )
-
-# --------------------------------------------------------------
-# Question 2: Adding Skilled to the regression
-# --------------------------------------------------------------
-
-did4 <- feols(employed ~ treatment + skilled | time + location, data)
-vcov_did4 <- vcovCL(did4, cluster = ~ location)
-
-texreg::texreg(list(did4), 
-                custom.coef.names = c("Treatment", "Skilled"),
-                custom.model.names = c("(1)"),
-                custom.model.numbers = c("1"),
-                include.rsquared = FALSE,
-                include.adjrs = FALSE,
-                include.nobs = TRUE,
-                include.rmse = FALSE,
-                caption = "Parametric ATET, with fixed effects, controlling for skill and clustered SE",
-                caption.above = TRUE,
-                stars = c(0.001, 0.01, 0.05),
-                single.row = TRUE,
-                digits = 4,
-                file = "output/tables/2_parametric_atet_skilled.tex",
-                vcov = vcov_did4)
 
 # --------------------------------------------------------------
 # Question 3: Fast Internet and Education
