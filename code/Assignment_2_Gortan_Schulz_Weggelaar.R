@@ -9,11 +9,15 @@
 
 # Load the data
 rm(list = ls())
+
+rstudioapi::getActiveDocumentContext()$path %>% dirname() %>% dirname() %>% setwd()
+
 load("code/data_assignment.RData")
 
 # Load necessary libraries
 packages_vector <- c("haven", "dplyr", "tidyr", "sandwich", "expss",
-                     "fBasics", "xtable", "data.table", "stargazer", "mfx", "jtools", "ggplot2")
+                     "fBasics", "xtable", "data.table", "stargazer", "mfx", "jtools", 
+                     "ggplot2")
 # install.packages(packages_vector)
 lapply(packages_vector, require, character.only = TRUE)
 # DiD-specific packages
@@ -122,7 +126,7 @@ bootstrap.np <- function(data, outcome_var, n_iter){
 # Set seed for replicability 
 set.seed(1234)
 
-atet_sd <- bootstrap.np(data, "employed", 1000)
+atet_sd <- bootstrap.np(data, "employed", 100)
 
 # Export in table format
 tibble(
