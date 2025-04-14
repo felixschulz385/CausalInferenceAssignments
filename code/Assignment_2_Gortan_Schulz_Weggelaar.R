@@ -122,16 +122,15 @@ bootstrap.np <- function(data, outcome_var, n_iter){
 # Set seed for replicability 
 set.seed(1234)
 
-atet_sd <- bootstrap.np(data, "employed", 10)
+atet_sd <- bootstrap.np(data, "employed", 1000)
 
 # Export in table format
 tibble(
   ATET = atet,
   SD = atet_sd$sd,
-  `Lower Bound` = atet - 1.96 * atet_sd$sd,
-  `Upper Bound` = atet + 1.96 * atet_sd$sd
+  `95% CI` = paste0("[", round(atet - 1.96 * atet_sd$sd, 3), ", ", round(atet + 1.96 * atet_sd$sd, 3), "]"),
 ) %>%
-mutate(across(everything(), ~ round(., 3))) %>% # round all columns to 3 digits
+mutate(across(where(is.numeric), ~ round(., 4))) %>% # round all columns to 3 digits
   kableExtra::kbl(
     "latex", booktabs = TRUE, 
     caption = "Internet access and employment: Non-parametric bootstrap estimates of ATET",
@@ -164,7 +163,7 @@ texreg::texreg(list(did1, did2, did3),
                                         2*pnorm(-abs(coef(did2)/sqrt(diag(vcov_did2)))),
                                         2*pnorm(-abs(coef(did3)/sqrt(diag(vcov_did3))))),
                 custom.coef.names = c("Intercept", "Connected", "Submarines", "Treatment"),
-                custom.model.names = c("(b)", "(c)", "d"),
+                custom.model.names = c("(b)", "(c)", "(d)"),
                 custom.gof.rows = list(
                   "Fixed Effects" = c("", "", "$\\checkmark$"),
                   "Clustered SEs" = c("", "$\\checkmark$", "$\\checkmark$")
@@ -177,7 +176,7 @@ texreg::texreg(list(did1, did2, did3),
                 caption.above = TRUE,
                 stars = c(0.001, 0.01, 0.05),
                 single.row = FALSE,
-                digits = 3,
+                digits = 4,
                 file = "output/tables/2_parametric_atet_combined.tex",
                 )
 
@@ -190,16 +189,17 @@ vcov_did4 <- vcovCL(did4, cluster = ~ location)
 
 texreg::texreg(list(did4), 
                 custom.coef.names = c("Treatment", "Skilled"),
-                custom.model.names = c("Fixed effects, clustered SE"),
+                custom.model.names = c("(1)"),
                 custom.model.numbers = c("1"),
                 include.rsquared = FALSE,
                 include.adjrs = FALSE,
                 include.nobs = TRUE,
                 include.rmse = FALSE,
-                caption = "Parametric ATET, with fixed effects, controlling ofr skill and clustered SE",
+                caption = "Parametric ATET, with fixed effects, controlling for skill and clustered SE",
                 caption.above = TRUE,
                 stars = c(0.001, 0.01, 0.05),
                 single.row = TRUE,
+                digits = 4,
                 file = "output/tables/2_parametric_atet_skilled.tex",
                 vcov = vcov_did4)
 
@@ -267,7 +267,7 @@ bootstrap.cluster.np <- function(data, outcome_var, cluster_var, n_iter){
 }
 
 
-atet_sd_boot <- bootstrap.cluster.np(data, "employed", "location", 10)
+atet_sd_boot <- bootstrap.cluster.np(data, "employed", "location", 100)
 
 # Export in table format
 tibble(
