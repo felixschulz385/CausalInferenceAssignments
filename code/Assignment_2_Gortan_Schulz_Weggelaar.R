@@ -262,7 +262,7 @@ tibble(
   `Lower Bound` = atet - 1.96 * atet_sd_boot$sd,
   `Upper Bound` = atet + 1.96 * atet_sd_boot$sd
 ) %>%
-mutate(across(everything(), ~ round(., 3))) %>% # round all columns to 3 digits
+mutate(across(everything(), ~ round(., 4))) %>% # round all columns to 3 digits
   kableExtra::kbl(
     "latex", booktabs = TRUE, 
     caption = "Internet access and employment: Non-parametric bootstrap estimates of ATET, Cluster-robust SEs",
