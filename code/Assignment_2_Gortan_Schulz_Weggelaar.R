@@ -161,13 +161,13 @@ common_trends_plot <- ggplot(data = common_trends,
   theme_bw(base_size = 20) +
   labs( y ="Share of highly educated", x= "Time", colour = "Group")
 
-ggsave("output/figures/2_common_trends.png", common_trends_plot, width = 8, height = 4, dpi = 300)
+ggsave("output/figures/2_common_trends.png", common_trends_plot, width = 10, height = 4, dpi = 300)
 
 # question (b): event study plot
 
-event_study <- feols(educ_high ~ i(time, connected, 0) | time + location, data)
+event_study <- feols(educ_high ~ i(time, connected, 0) | time + location, cluster = ~location, data)
 
-png(file="output/figures/2_event_study.png",width=6, height=3, units="in", res=300)
+png(file="output/figures/2_event_study.png",width=10, height=5, units="in", res=300)
 iplot(event_study)
 dev.off()
 
