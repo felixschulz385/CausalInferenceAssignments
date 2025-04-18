@@ -10,6 +10,7 @@
 # Load the data
 rm(list = ls())
 
+library(dplyr)
 rstudioapi::getActiveDocumentContext()$path %>% dirname() %>% dirname() %>% setwd()
 
 load("code/data_assignment.RData")
