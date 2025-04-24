@@ -11,70 +11,88 @@
 rm(list = ls())
 load("code/AngristEvans1980_reduced.RData")
 
+packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "estimatr", "broom", "broom.mixed", "jtools", "texreg")
 # Load necessary libraries
 lapply(packages.vector, require, character.only = TRUE)
 
 # Turn into tibble
-raw.data <- tibble(raw.data)
+data <- tibble(data)
 
 
 # --------------------------------------------------------------
 # Question 1
 # --------------------------------------------------------------
 
-
 # a)
 
 data_married <- data[data$msample == 1, ]
 
-
 avg_age_mom <- mean(data_married$agefstm, na.rm = TRUE)
 avg_age_dad <- mean(data_married$agefstd, na.rm = TRUE)
+# NOTE: this is not the income when the first child was born
 avg_inc_mom <- mean(data_married$incomem, na.rm = TRUE)
 avg_inc_dad <- mean(data_married$incomed, na.rm = TRUE)
 
 # Your summary stats
 stats <- c(avg_age_mom, avg_age_dad, avg_inc_mom, avg_inc_dad)
-names(stats) <- c("Average age (Mother)", "Average age (Father)",
+names(stats) <- c("Average age at First Birth (Mother)", "Average age at First Birth (Father)",
                   "Average income (Mother)", "Average income (Father)")
 
 # Stargazer table
-stargazer(stats, type = "latex", summary = FALSE, title = "Parental Characteristics at First Birth")
-
-
+stargazer(stats, type = "latex", summary = FALSE, title = "Parental Characteristics")
 
 # b)
 
 # First stage regression w/o controls
-first_stage1 <- lm(morekids ~ samesex, data = data_married)
-cov <- vcovHC(first_stage1, type = "HC")
-robust.se.first.stage1 <- sqrt(diag(cov))
-summ(first_stage1, robust = "HC1")
+first_stage1b <- lm(morekids ~ samesex, data = data_married)
+robust.se.first.stage1b <- sqrt(diag(vcovHC(first_stage1b, type = "HC")))
+robust.p.val.first.stage1b <- 2 * (1 - pnorm(abs(coef(first_stage1b) / robust.se.first.stage1b)))
 
-# Second stage regression w/o controls
-iv_model1 <- ivreg(hourswd ~ morekids | samesex, data = data_married)
-summary(iv_model1, vcov = sandwich, diagnostics = TRUE)
+iv_model1b <- ivreg(hourswd ~ morekids | samesex, data = data_married)
+robust.se.iv_model1b <- sqrt(diag(vcovHC(iv_model1b, type = "HC")))
+robust.p.val.iv_model1b <- 2 * (1 - pnorm(abs(coef(iv_model1b) / robust.se.iv_model1b)))
 
 # c)
 
 # First stage regression
-first_stage2 <- lm(morekids ~ boys2 + girls2, data = data_married)
-cov <- vcovHC(first_stage2, type = "HC")
-robust.se.first.stage2 <- sqrt(diag(cov))
-summ(first_stage2, robust = "HC1")
+first_stage1c <- lm(morekids ~ boys2 + girls2, data = data_married)
+robust.se.first.stage1c <- sqrt(diag(vcovHC(first_stage1c, type = "HC")))
+robust.p.val.first.stage1c <- 2 * (1 - pnorm(abs(coef(first_stage1c) / robust.se.first.stage1c)))
 
 # Second stage regression w/o controls
-iv_model2 <- ivreg(hourswd ~ morekids | boys2 + girls2, data = data_married)
-summary(iv_model2, vcov = sandwich, diagnostics = TRUE)
+iv_model1c <- ivreg(hourswd ~ morekids | boys2 + girls2, data = data_married)
+robust.se.iv_model1c <- sqrt(diag(vcovHC(iv_model1c, type = "HC")))
+robust.p.val.iv_model1c <- 2 * (1 - pnorm(abs(coef(iv_model1c) / robust.se.iv_model1c)))
 
-# c)
+# e)
+
+ols_model1e <- lm(hourswd ~ morekids, data = data_married)
+robust.se.ols_model1e <- sqrt(diag(vcovHC(ols_model1e, type = "HC")))
+robust.p.val.ols_model1e <- 2 * (1 - pnorm(abs(coef(ols_model1e) / robust.se.ols_model1e)))
+
+screenreg(
+  list(first_stage1b, first_stage1c, iv_model1b, iv_model1c, ols_model1e),
+  #custom.coef.names = c("samesex"),
+  custom.model.names = c("1(b)1", "1(c)1", "1(b)2", "1(c)2", "1(e)"),
+  custom_header = c(
+    "First Stage" = 1:2,
+    "Second Stage" = 3:4,
+    "OLS" = 5
+  ),
+  stars = c(0.001, 0.01, 0.05),
+  override.se = list(robust.se.first.stage1b, robust.se.first.stage1c, robust.se.iv_model1b, robust.se.iv_model1c, robust.se.ols_model1e),
+  override.pvalues = list(robust.p.val.first.stage1b, robust.p.val.first.stage1c, robust.p.val.iv_model1b, robust.p.val.iv_model1c, robust.p.val.ols_model1e),
+  dcolumn = TRUE,
+  float.pos = "H",
+  booktabs = TRUE,
+  use.packages = FALSE,
+  label = "tab:first_stage",
+  caption = "First Stage Regression"
+)
+
+# d)
 
 #Weirdly enough, all estimates are not significant?? is this what the exercise asks sus to do?
-
-# d) OLS estimate
-
-ols_model1 <- lm(hourswd ~ morekids, data = data_married)
-summ(ols_model1, robust = "HC1")
 
 
 # --------------------------------------------------------------
@@ -103,20 +121,46 @@ data_married_below <- data_married %>%
         filter(agem < median_age)
 
 
-ols_model2 <- lm(weeksm ~ morekids + agem + agefstm + blackm + hispm + othracem, data = data_married_below)
-summary(ols_model2)
-
+ols_model2b <- lm(weeksm ~ morekids + agem + agefstm + blackm + hispm + othracem, data = data_married_below)
+robust.se.ols_model2b <- sqrt(diag(vcovHC(ols_model2b, type = "HC")))
+robust.p.val.ols_model2b <- 2 * (1 - pnorm(abs(coef(ols_model2b) / robust.se.ols_model2b)))
 
 # c) 2SLS estimate 
 
-# First stage regression
-first_stage3 <- lm(morekids ~ samesex, data = data_married_below)
-cov <- vcovHC(first_stage3, type = "HC")
-robust.se.first.stage3 <- sqrt(diag(cov))
-summ(first_stage3, robust = "HC1")
-
 # Second stage regression with controls
-iv_model3 <- ivreg(weeksm ~ morekids + agem + agefstm + blackm + hispm + othracem | samesex, data = data_married_below)
-summary(iv_model3, vcov = sandwich, diagnostics = TRUE)
+iv_model2c <- ivreg(weeksm ~ morekids + agem + agefstm + blackm + hispm + othracem | samesex + agem + agefstm + blackm + hispm + othracem , data = data_married_below)
+robust.se.iv_model2c <- sqrt(diag(vcovHC(iv_model2c, type = "HC")))
+robust.p.val.iv_model2c <- 2 * (1 - pnorm(abs(coef(iv_model2c) / robust.se.iv_model2c)))
 
+# output table
+screenreg(
+  list(ols_model2b, iv_model2c),
+  custom.model.names = c("2(b)", "2(c)"),
+  stars = c(0.001, 0.01, 0.05),
+  override.se = list(robust.se.ols_model2b, robust.se.iv_model2c),
+  override.pvalues = list(robust.p.val.ols_model2b, robust.p.val.iv_model2c),
+  dcolumn = TRUE,
+  float.pos = "H",
+  booktabs = TRUE,
+  use.packages = FALSE,
+  label = "tab:ols_iv",
+  caption = "OLS and IV Estimation"
+)
+
+# --------------------------------------------------------------
+# Question 3
+# --------------------------------------------------------------
+
+# a)
+
+data_married %>%
+  reframe(
+    participm = mean(hourswm > 0),
+    participd = mean(hourswd > 0),
+    parttimem = 1 - mean(hourswm[hourswm > 0] >= 40),
+    parttimed = 1 - mean(hourswd[hourswd > 0] >= 40),
+  )
+
+# The female labor participation rate is at just above 52% while the male labor participation rate is at about 98%. 
+# The share of parttime workers is at about 52% for moms and 6% for dads.
 
