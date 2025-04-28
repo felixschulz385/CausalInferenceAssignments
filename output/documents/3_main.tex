@@ -1,6 +1,9 @@
 \documentclass{scrartcl}
 
 \usepackage[utf8x]{inputenc}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{titling}
@@ -31,17 +34,21 @@
 \paragraph*{(a)}
 % How could what you observe affect the intra-household division of (market) labour supply, domestic chores and childcare?
 
-\input{output/tables/3_avg_age}
+The father has a much higher income than the mother. This hints a division in which the father works outside the household, while the mother is responsible for domestic chores and childcare.
 
-\input{output/tables/3_iv_ols_weeksm}
+\input{output/tables/3}
 
 \paragraph*{(d)}
-% Compare methods, 2SLS estimates, first stages.
 
-Weirdly enough, all estimates are not significant?? is this what the exercise asks us to do?
+\input{output/tables/3_iv_ols_hourswd}
+% Compare and comment on the different approaches in points (b) and (c) the 2SLS estimates you obtained in points (b) and (c) the estimates from the first stages in points (b) and (c)
+
+The variable used in (b) is a weighted average of the variables used in (c). The assumption of exogeneity should therefore hold in both setups. Due to the large uncertainty in both the second stage estimates, we abstain from interpreting the small observed difference in point estimates. First stage results are highly significant for both, showing that more couples seek to have another child after having two girls compared to two boys.
 
 \paragraph*{(e)}
 % Compare the OLS estimate to the 2SLS you got before and also the respective standard errors. What do you conclude? Which one would you use for inference?
+
+Similar to the IV approach, the OLS regression does not yield a statistically significant result. While the sign of the estimate is the opposite of the above, this cannot be interpreted with confidence. Still, the IV approach provides a more attractive causal identification and is therefore preferred.
 
 \subsection*{Question 2}
 
