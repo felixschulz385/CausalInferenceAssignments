@@ -29,16 +29,11 @@
 \subsection*{Question 1}
 
 \paragraph*{(a)}
-% Compute average age and income for mothers and fathers.
-% Discuss implications for intra-household division of labour.
+% How could what you observe affect the intra-household division of (market) labour supply, domestic chores and childcare?
 
 \input{output/tables/3_avg_age}
 
-\paragraph*{(b)}
-% 2SLS estimation: morekids on hourswd using samesex.
-
-\paragraph*{(c)}
-% 2SLS estimation: morekids on hourswd using boys2 and girls2.
+\input{output/tables/3_iv_ols_weeksm}
 
 \paragraph*{(d)}
 % Compare methods, 2SLS estimates, first stages.
@@ -46,44 +41,77 @@
 Weirdly enough, all estimates are not significant?? is this what the exercise asks us to do?
 
 \paragraph*{(e)}
-% OLS estimation and comparison to 2SLS.
+% Compare the OLS estimate to the 2SLS you got before and also the respective standard errors. What do you conclude? Which one would you use for inference?
 
 \subsection*{Question 2}
 
 \paragraph*{(a)}
-% Median age and fertility rate above/below median.
+
+\input{output/tables/3_children_age_group}
 
 \paragraph*{(b)}
-% OLS estimation controlling for covariates.
+% Why would you control specifically for these variables? Are these control variables sufficient to alleviate potential endogeneity concerns? Why yes or why not? 
 
 \paragraph*{(c)}
-% 2SLS estimation and comparison to OLS.
+% Compare your results to the OLS estimates and comment. 
+
+\input{output/tables/3_iv_ols_weeksm}
 
 \paragraph*{(d)}
-% Potential issues with sample restrictions.
+% Why might the sample restrictions you imposed (women below the median age) be problematic for the 2SLS approach? 
 
-\subsection*{Question 3}
+\section*{Question 3}
 
 \paragraph*{(a)}
-% Compare employment and part-time rates USA vs Switzerland. Expectation for effects.
+% (Task description)
+% Independent of the instrument used, Angrist and Evans (1998) find no economically and statistically
+% significant effect on male labour supply. Check the employment rates in AngristEvans1980_reduced.RData
+% for men and women, and how common part-time work is among employed men and women.
+% Compare the results with the rates for Switzerland outlined above.
+% Based on that, discuss how you would expect the effect of fertility on male labour supply
+% in Switzerland today to differ from those in Angrist and Evans (1998).
 
 \paragraph*{(b)}
-% 2SLS approach to estimate fertility effect in Switzerland.
+% (Task description)
+% Discuss how you would use a 2SLS approach to estimate the effect of fertility
+% on labour supply in Switzerland today.
 
 \paragraph*{(c)}
-% Adjustments to sample restrictions for Swiss data.
+% (Task description)
+% Discuss how you would modify the sample restrictions that we imposed
+% in the IV lab session on the data if we were to use recent data from Switzerland.
+
+\subsection*{Question 4 (PhD Only)}
+
+\paragraph*{(a)}
+% (Task description)
+% Which test can be performed to test for the exogeneity of the instruments in a parametric IV?
+% Explain the logic behind it, and clearly explain what hypothesis we can test.
+
+\paragraph*{(b)}
+% (Task description)
+% Under which assumptions will the test be informative about instrument validity?
 
 \section*{Regression Discontinuity Design}
 
 \subsection*{Question 6}
 
 \paragraph*{(a)}
-% Use of pre-treatment outcomes to support identification in Meyersson (2014).
+% (Task description)
+% In addition to data from the 2000 population census,
+% the author uses information on outcomes in 1990, which is before the assignment to the treatment.
+% What does he use it for and why is it in support of the identification strategy?
 
 \paragraph*{(b)}
-% Reason for smaller optimal bandwidth for women.
+% (Task description)
+% The author determines the optimal bandwidth using the algorithm developed by
+% Imbens and Kalyanaraman (2012).
+% Briefly explain why it yields a smaller optimal bandwidth for women.
 
 \paragraph*{(c)}
-% Mechanism proposed and test procedures.
+% (Task description)
+% For women, the author proposes and tests a mechanism that can explain the positive RD estimate
+% (despite a negative raw correlation).
+% Explain this mechanism and comment on the test procedures.
 
 \end{document}
