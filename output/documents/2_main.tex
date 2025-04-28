@@ -38,9 +38,9 @@
 
 % Look into whether there is a paper that claims this
 
-\paragraph*{(c)} These standard errors are substantially larger than the previous estimates.
+\paragraph*{(c)} These standard errors are substantially larger than the previous estimates, suggesting the presence of heteroskedasticity and/or serial correlation in the error terms.
 
-\paragraph*{(d)} The point estimate is larger than the non-parametric estimate. The fixed effect approach used here uses the within estimator, focusing on within-location variation, additionally accounting for temporal fixed effects. The remaining variation after demeaning significantly differs and thereby also the coefficients. We expect to obtain different coefficients as, in the original specification, we were not taking into effect unobservable differences among locations (that differ in their initial employment situation) and the common effects that certain year-quarters have on the employment level.  
+\paragraph*{(d)} The point estimate is larger than the non-parametric estimate. The fixed effect approach used here uses the within estimator, focusing on within-location variation, additionally accounting for temporal fixed effects. The remaining variation after demeaning significantly differs and thereby also the coefficients. We expect to obtain different coefficients as, in the original specification, we were not taking into account unobservable differences among locations (that differ in their initial employment situation) and the common effects that certain year-quarters have on the employment level. The low, insignificant, pooled estimate of \textit{Treatment} might reflect that many treated locations were starting from low employment levels. When we eliminate this initial heterogeneity, we can properly estimate the effect.   
 
 % effect is larger
 % should we expect them to be different?
@@ -49,7 +49,7 @@
 
 \paragraph*{(a)}
 % Do you think that is a good idea to control for the dummy for being skilled? Explain.
-Yes, it is a good idea, because we expect skill to be correlated with both treatment and the outcome. Note that if \textit{Skilled} was a time-invariant characteristic of each location, than it would not be needed to be included, as its effect would be absorbed by location fixed effect. 
+Yes, it is a good idea, because we expect skill to be correlated with both treatment, as skilled people might decide to go live close to the grid, and the outcome, as they artificially increase the employment level. Note that if \textit{Skilled} was a time-invariant characteristic of each location, than it would not be needed to be included, as its effect would be absorbed by location fixed effect. On the other hand, if \textit{Treatment} increases exogenously Skill and Employment, it might be a 'bad' control, since it will cause a downward bias in our response.
 
 \paragraph*{(b)}
 % Compare the result with the estimate from point 1.d. and comment
@@ -59,7 +59,7 @@ The estimate is lower compared to point 1d, suggesting that skilled people go to
 
 \paragraph*{(a)}
 % Provide a possible explanation for the trends you observe.
-The first thing we observe is that \textit{Connected} locations have a higher share of educated people. One potential explanation is that living closer to the grid already allowed faster internet, attracting higher educated people. Moreover, we see that not connected locations are witnessing downward trend in the share of highly educated, possibly due to the fact educated people might migrate more to other areas / countries with job opportunities more similar to their education. Finally, we observe an increase of highly educated people in connected areas after fast internet arrived, possibly due to an increase in education opportunities.  
+The first thing we observe is that \textit{Connected} locations have a higher share of educated people. One potential explanation is that living closer to the grid already allowed faster internet, attracting higher educated people. Moreover, we see that not connected locations are witnessing downward trend in the share of highly educated, possibly due to the fact educated people might migrate more to other areas / countries with job opportunities more similar to their education. Finally, we observe an increase of highly educated people in connected areas after fast internet arrived, possibly due to an increase in job opportunities.  
 
 \begin{figure}[h!]
     \centering
@@ -100,20 +100,19 @@ Our estimate on employment would be upward biased because we observe a (i) downw
 
 % Why can’t we just regress female labour supply on the number of children to estimate a causal effect?
 
-In this particular example, regressing female labor supply on the number of children would lead to endogeneity, caused by the omitted variable bias. This is because deciding on the number of children may be influenced by unobserved family factors such as their preferences for leisure over work, access to child care, or family support. This violates the exogeneity or zero conditional mean error assumption that OLS relies on for unbiased and consistent estimates.
+In this particular example, regressing female labor supply on the number of children would lead to endogeneity. This is because deciding on the number of children may be influenced by unobserved family factors such as their preferences for leisure over work, access to child care, or family support. This violates the exogeneity or zero conditional mean error assumption that OLS relies on for unbiased and consistent estimates.
 
 \paragraph*{(b)}
 
 % The IV strategy of the authors only identifies a very specific average treatment effect. What is that? Be precise and context-specific
 
-The estimated treatment effect is a local average treatment effect (LATE), because the authors identify the effect of having a third child on labor supply, for those parents whose decision of having a third child is affected by the sex composition of the first two children (same sex). Therefore, the estimated effect is specific to that group. \\
-This subset of parents would be called compliers, while parents that would have three children regardless would be considered always-takers, and parents that would have two children regardless of their sex, would be never-takers. The estimated causal effect is specific to the compliers group.
+The estimated treatment effect is a local average treatment effect (LATE), also known as the complier average causal effect (CACE), because the authors identify the effect of having a third child on labor supply, for those parents whose decision of having a third child is affected by the sex composition of the first two children (same sex). Therefore, the estimated effect is specific to that group. 
 
 \paragraph*{(c)}
 
 % Consider columns 1 and 2 in Table 7, which presents OLS and IV estimates, respectively. Provide an explanation for why the OLS estimate are lower than the IV ones (i.e. OLS over-estimates the negative effect).
 
-The OLS estimate over-estimates the causal effect because it is unable to isolate the effect of an additional child on labor supply, since it doesn't take into account unobserved factors such as preferences for leisure over work, access to child care, or family support. The result is an estimated effect that combines the true effect of an additional child, plus the effect of these unobserved factors. \\
-Using IV terminology, The OLS estimate would also include the always-takers, i.e., parents that would have three children regardless, and these parents may be fundamentally different in their unobserved factors compared to the compliers, which are parents that would only have additional children when the first two are of the same sex.
+OLS over-estimates the causal effect because it is unable to isolate the effect of an additional child on labor supply, since it doesn't take into account unobserved factors such as preferences for leisure over work, access to child care, or family support. The OLS estimates are more negative compared to the IV estimates, possibly due to the fact it is more common for women with less child care support to have more than two children (for instance, women with big career prospectives, who probably have access to child care support beyond family, might usually have less children). \\
+
 
 \end{document}
