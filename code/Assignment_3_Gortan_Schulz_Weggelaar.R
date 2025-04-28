@@ -33,21 +33,35 @@ avg_age_dad <- mean(data_married$agefstd, na.rm = TRUE)
 avg_inc_mom <- mean(data_married$incomem, na.rm = TRUE)
 avg_inc_dad <- mean(data_married$incomed, na.rm = TRUE)
 
-# Your summary stats
-stats <- c(avg_age_mom, avg_age_dad, avg_inc_mom, avg_inc_dad)
-names(stats) <- c("Average age at First Birth (Mother)", "Average age at First Birth (Father)",
-                  "Average income (Mother)", "Average income (Father)")
+stats <- tibble(
+  "Age at First Birth" = c(avg_age_mom, avg_age_dad),
+  "Average Income" = c(avg_inc_mom, avg_inc_dad)
+) %>%
+  mutate(Parent = c("Mother", "Father"), .before = 1)
+
+stats %>%
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    linesep = "",
+    caption = "Summary Statistics of Parents",
+    label = "tab:parents_stats",
+    digits = 2,
+    escape = FALSE,
+    align = "c",
+  ) %>%
+  writeLines("output/tables/3_parents_stats.tex")
+
 
 # Stargazer table
 stargazer(
   stats, type = "latex", summary = FALSE, 
-  out = "output/tables/3_avg_age.tex",
-  title = "Parental Characteristics",
-  label = "tab:avg_age",
+  out = "output/tables/3_parents_stats.tex",
+  title = "Characteristics of parants by gender",
+  label = "tab:parents_stats",
   digits = 2,
   align = TRUE,
   table.layout = "l",
-  notes = "Age at first birth and income of parents in the sample of married couples.",
   notes.align = "l",
   notes.append = FALSE
 )
