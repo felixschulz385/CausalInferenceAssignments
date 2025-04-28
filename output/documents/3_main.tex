@@ -1,0 +1,92 @@
+\documentclass{scrartcl}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{titling}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[a4paper, margin=.9in]{geometry}
+
+\setlength{\droptitle}{-7.5em}
+
+\title{Causal Inference for Policy Evaluation\\
+\Large{Assignment 3}}
+\author{Marco Gortan, Felix Schulz, Benjamin Weggelaar}
+\date{\today}
+
+\newcommand{\marco}[1]{\textcolor{red}{#1}}
+\newcommand{\felix}[1]{\textcolor{cyan}{#1}}
+\newcommand{\benji}[1]{\textcolor{green}{#1}}
+
+\begin{document}
+
+\maketitle
+
+\section*{Instrumental Variables}
+
+\subsection*{Question 1}
+
+\paragraph*{(a)}
+% Compute average age and income for mothers and fathers.
+% Discuss implications for intra-household division of labour.
+
+\input{output/tables/3_avg_age_income}
+
+\paragraph*{(b)}
+% 2SLS estimation: morekids on hourswd using samesex.
+\input{output/tables/3_2sls_samesex}
+
+\paragraph*{(c)}
+% 2SLS estimation: morekids on hourswd using boys2 and girls2.
+\input{output/tables/3_2sls_boys2girls2}
+
+\paragraph*{(d)}
+% Compare methods, 2SLS estimates, first stages.
+
+\paragraph*{(e)}
+% OLS estimation and comparison to 2SLS.
+
+\subsection*{Question 2}
+
+\paragraph*{(a)}
+% Median age and fertility rate above/below median.
+
+\input{output/tables/3_median_age_fertility}
+
+\paragraph*{(b)}
+% OLS estimation controlling for covariates.
+\input{output/tables/3_ols_mothers}
+
+\paragraph*{(c)}
+% 2SLS estimation and comparison to OLS.
+
+\paragraph*{(d)}
+% Potential issues with sample restrictions.
+
+\subsection*{Question 3}
+
+\paragraph*{(a)}
+% Compare employment and part-time rates USA vs Switzerland. Expectation for effects.
+
+\paragraph*{(b)}
+% 2SLS approach to estimate fertility effect in Switzerland.
+
+\paragraph*{(c)}
+% Adjustments to sample restrictions for Swiss data.
+
+\section*{Regression Discontinuity Design}
+
+\subsection*{Question 6}
+
+\paragraph*{(a)}
+% Use of pre-treatment outcomes to support identification in Meyersson (2014).
+
+\paragraph*{(b)}
+% Reason for smaller optimal bandwidth for women.
+
+\paragraph*{(c)}
+% Mechanism proposed and test procedures.
+
+\end{document}
