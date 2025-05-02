@@ -1,0 +1,124 @@
+\documentclass{scrartcl}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{titling}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[a4paper, margin=.9in]{geometry}
+
+\setlength{\droptitle}{-7.5em}
+
+\title{Causal Inference for Policy Evaluation\\
+\Large{Assignment 3}}
+\author{Marco Gortan, Felix Schulz, Benjamin Weggelaar}
+\date{\today}
+
+\newcommand{\marco}[1]{\textcolor{red}{#1}}
+\newcommand{\felix}[1]{\textcolor{cyan}{#1}}
+\newcommand{\benji}[1]{\textcolor{green}{#1}}
+
+\begin{document}
+
+\maketitle
+
+\section*{Instrumental Variables}
+
+\subsection*{Question 1}
+
+\paragraph*{(a)}
+% How could what you observe affect the intra-household division of (market) labour supply, domestic chores and childcare?
+
+The father has a much higher income than the mother. This hints a division in which the father works outside the household, while the mother is responsible for domestic chores and childcare.
+
+\input{output/tables/3}
+
+\paragraph*{(d)}
+
+\input{output/tables/3_iv_ols_hourswd}
+% Compare and comment on the different approaches in points (b) and (c) the 2SLS estimates you obtained in points (b) and (c) the estimates from the first stages in points (b) and (c)
+
+The variable used in (b) is a weighted average of the variables used in (c). The assumption of exogeneity should therefore hold in both setups. Due to the large uncertainty in both the second stage estimates, we abstain from interpreting the small observed difference in point estimates. First stage results are highly significant for both, showing that more couples seek to have another child after having two girls compared to two boys.
+
+\paragraph*{(e)}
+% Compare the OLS estimate to the 2SLS you got before and also the respective standard errors. What do you conclude? Which one would you use for inference?
+
+Similar to the IV approach, the OLS regression does not yield a statistically significant result. While the sign of the estimate is the opposite of the above, this cannot be interpreted with confidence. Still, the IV approach provides a more attractive causal identification and is therefore preferred.
+
+\subsection*{Question 2}
+
+\paragraph*{(a)}
+
+\input{output/tables/3_children_age_group}
+
+\paragraph*{(b)}
+% Why would you control specifically for these variables? Are these control variables sufficient to alleviate potential endogeneity concerns? Why yes or why not? 
+
+\paragraph*{(c)}
+% Compare your results to the OLS estimates and comment. 
+
+\input{output/tables/3_iv_ols_weeksm}
+
+\paragraph*{(d)}
+% Why might the sample restrictions you imposed (women below the median age) be problematic for the 2SLS approach? 
+
+\section*{Question 3}
+
+\paragraph*{(a)}
+% (Task description)
+% Independent of the instrument used, Angrist and Evans (1998) find no economically and statistically
+% significant effect on male labour supply. Check the employment rates in AngristEvans1980_reduced.RData
+% for men and women, and how common part-time work is among employed men and women.
+% Compare the results with the rates for Switzerland outlined above.
+% Based on that, discuss how you would expect the effect of fertility on male labour supply
+% in Switzerland today to differ from those in Angrist and Evans (1998).
+
+\paragraph*{(b)}
+% (Task description)
+% Discuss how you would use a 2SLS approach to estimate the effect of fertility
+% on labour supply in Switzerland today.
+
+\paragraph*{(c)}
+% (Task description)
+% Discuss how you would modify the sample restrictions that we imposed
+% in the IV lab session on the data if we were to use recent data from Switzerland.
+
+\subsection*{Question 4 (PhD Only)}
+
+\paragraph*{(a)}
+% (Task description)
+% Which test can be performed to test for the exogeneity of the instruments in a parametric IV?
+% Explain the logic behind it, and clearly explain what hypothesis we can test.
+
+\paragraph*{(b)}
+% (Task description)
+% Under which assumptions will the test be informative about instrument validity?
+
+\section*{Regression Discontinuity Design}
+
+\subsection*{Question 6}
+
+\paragraph*{(a)}
+% (Task description)
+% In addition to data from the 2000 population census,
+% the author uses information on outcomes in 1990, which is before the assignment to the treatment.
+% What does he use it for and why is it in support of the identification strategy?
+
+\paragraph*{(b)}
+% (Task description)
+% The author determines the optimal bandwidth using the algorithm developed by
+% Imbens and Kalyanaraman (2012).
+% Briefly explain why it yields a smaller optimal bandwidth for women.
+
+\paragraph*{(c)}
+% (Task description)
+% For women, the author proposes and tests a mechanism that can explain the positive RD estimate
+% (despite a negative raw correlation).
+% Explain this mechanism and comment on the test procedures.
+
+\end{document}

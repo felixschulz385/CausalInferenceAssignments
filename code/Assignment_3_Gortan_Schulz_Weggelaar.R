@@ -11,7 +11,7 @@
 rm(list = ls())
 load("code/AngristEvans1980_reduced.RData")
 
-packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "estimatr", "broom", "broom.mixed", "jtools", "texreg")
+packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "broom", "broom.mixed", "jtools", "texreg", "kableExtra")
 # Load necessary libraries
 lapply(packages.vector, require, character.only = TRUE)
 
@@ -33,13 +33,25 @@ avg_age_dad <- mean(data_married$agefstd, na.rm = TRUE)
 avg_inc_mom <- mean(data_married$incomem, na.rm = TRUE)
 avg_inc_dad <- mean(data_married$incomed, na.rm = TRUE)
 
-# Your summary stats
-stats <- c(avg_age_mom, avg_age_dad, avg_inc_mom, avg_inc_dad)
-names(stats) <- c("Average age at First Birth (Mother)", "Average age at First Birth (Father)",
-                  "Average income (Mother)", "Average income (Father)")
+stats <- tibble(
+  "Age at First Birth" = c(avg_age_mom, avg_age_dad),
+  "Average Income" = c(avg_inc_mom, avg_inc_dad)
+) %>%
+  mutate(Parent = c("Mother", "Father"), .before = 1)
 
-# Stargazer table
-stargazer(stats, type = "latex", summary = FALSE, title = "Parental Characteristics")
+stats %>%
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    linesep = "",
+    caption = "Summary Statistics of Parents",
+    label = "tab:parents_stats",
+    digits = 2,
+    escape = FALSE,
+    align = "c",
+  ) %>%
+  writeLines("output/tables/3_parents_stats.tex")
+
 
 # b)
 
@@ -70,11 +82,12 @@ ols_model1e <- lm(hourswd ~ morekids, data = data_married)
 robust.se.ols_model1e <- sqrt(diag(vcovHC(ols_model1e, type = "HC")))
 robust.p.val.ols_model1e <- 2 * (1 - pnorm(abs(coef(ols_model1e) / robust.se.ols_model1e)))
 
-screenreg(
+texreg(
   list(first_stage1b, first_stage1c, iv_model1b, iv_model1c, ols_model1e),
+  file = "output/tables/3_iv_ols_hourswd.tex",
   #custom.coef.names = c("samesex"),
   custom.model.names = c("1(b)1", "1(c)1", "1(b)2", "1(c)2", "1(e)"),
-  custom_header = c(
+  custom.header = list(
     "First Stage" = 1:2,
     "Second Stage" = 3:4,
     "OLS" = 5
@@ -86,46 +99,56 @@ screenreg(
   float.pos = "H",
   booktabs = TRUE,
   use.packages = FALSE,
-  label = "tab:first_stage",
-  caption = "First Stage Regression"
+  table = FALSE,
+  label = "tab:iv_ols_hourswd",
+  caption = "Dad's hours worked and fertility: OLS and IV",
 )
-
-# d)
-
-#Weirdly enough, all estimates are not significant?? is this what the exercise asks sus to do?
-
 
 # --------------------------------------------------------------
 # Question 2
 # --------------------------------------------------------------
 
-
 # a) median age mother and share of women with >2 children
 
 median_age <- median(data_married$agem, na.rm = TRUE)
-sum(is.na(data_married$agem))
+median_age %>% paste0(collapse = "") %>% writeLines("output/other/3_median_age.tex")
 
-data_married$age_group <- ifelse(data_married$agem <= median_age, "below", "above")
+data_married$age_group <- ifelse(
+  data_married$agem <= median_age,
+  paste0("$age \\leq ", median_age, "$"),
+  paste0("$age > ", median_age, "$")
+  ) %>% as.factor()
                         
 data_married %>%
   filter(!is.na(age_group)) %>%
   group_by(age_group) %>%
   summarise(
-    share_more_than_2kids = mean(morekids == 1, na.rm = TRUE),
+    morekids_share = mean(morekids == 1, na.rm = TRUE),
     n = n()
-  )
+  ) %>%
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    linesep = "",
+    caption = "Share with \\textgreater 2 Children by Age Group",
+    label = "tab:children_age_group",
+    digits = 2,
+    col.names = c("Age Group", "Share with \\textgreater 2 Children", "N"),
+    escape = FALSE,
+    align = "c",
+  ) %>%
+  writeLines("output/tables/3_children_age_group.tex")
 
-# b) OLS estimation on Weeksm
+# b) OLS estimation on weeksm
 
 data_married_below <- data_married %>%
-        filter(agem < median_age)
-
+  filter(agem <= median_age)
 
 ols_model2b <- lm(weeksm ~ morekids + agem + agefstm + blackm + hispm + othracem, data = data_married_below)
 robust.se.ols_model2b <- sqrt(diag(vcovHC(ols_model2b, type = "HC")))
 robust.p.val.ols_model2b <- 2 * (1 - pnorm(abs(coef(ols_model2b) / robust.se.ols_model2b)))
 
-# c) 2SLS estimate 
+# c) 2SLS estimate
 
 # Second stage regression with controls
 iv_model2c <- ivreg(weeksm ~ morekids + agem + agefstm + blackm + hispm + othracem | samesex + agem + agefstm + blackm + hispm + othracem , data = data_married_below)
@@ -133,8 +156,9 @@ robust.se.iv_model2c <- sqrt(diag(vcovHC(iv_model2c, type = "HC")))
 robust.p.val.iv_model2c <- 2 * (1 - pnorm(abs(coef(iv_model2c) / robust.se.iv_model2c)))
 
 # output table
-screenreg(
+texreg(
   list(ols_model2b, iv_model2c),
+  file = "output/tables/3_iv_ols_weeksm.tex",
   custom.model.names = c("2(b)", "2(c)"),
   stars = c(0.001, 0.01, 0.05),
   override.se = list(robust.se.ols_model2b, robust.se.iv_model2c),
@@ -143,8 +167,9 @@ screenreg(
   float.pos = "H",
   booktabs = TRUE,
   use.packages = FALSE,
-  label = "tab:ols_iv",
-  caption = "OLS and IV Estimation"
+  label = "tab:ols_iv_weeksm",
+  table = FALSE,
+  caption = "Mother's weeks worked and fertility: OLS and IV",
 )
 
 # --------------------------------------------------------------
@@ -153,7 +178,8 @@ screenreg(
 
 # a)
 
-data_married %>%
+# Calculate statistics and format into text
+stats <- data_married %>%
   reframe(
     participm = mean(hourswm > 0),
     participd = mean(hourswd > 0),
@@ -161,6 +187,14 @@ data_married %>%
     parttimed = 1 - mean(hourswd[hourswd > 0] >= 40),
   )
 
-# The female labor participation rate is at just above 52% while the male labor participation rate is at about 98%. 
-# The share of parttime workers is at about 52% for moms and 6% for dads.
+# Format text
+participation_text <- sprintf(
+  "The female labor participation rate is %.1f\\%% while the male labor participation rate is %.1f\\%%. The share of parttime workers is %.1f\\%% for moms and %.1f\\%% for dads.",
+  stats$participm * 100,
+  stats$participd * 100,
+  stats$parttimem * 100,
+  stats$parttimed * 100
+)
 
+# Write to file
+writeLines(participation_text, "output/other/3_participation.tex")
