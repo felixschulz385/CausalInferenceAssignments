@@ -11,7 +11,7 @@
 rm(list = ls())
 load("code/AngristEvans1980_reduced.RData")
 
-packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "estimatr", "broom", "broom.mixed", "jtools", "texreg", "kableExtra")
+packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "broom", "broom.mixed", "jtools", "texreg", "kableExtra")
 # Load necessary libraries
 lapply(packages.vector, require, character.only = TRUE)
 
@@ -52,19 +52,6 @@ stats %>%
   ) %>%
   writeLines("output/tables/3_parents_stats.tex")
 
-
-# Stargazer table
-stargazer(
-  stats, type = "latex", summary = FALSE, 
-  out = "output/tables/3_parents_stats.tex",
-  title = "Characteristics of parants by gender",
-  label = "tab:parents_stats",
-  digits = 2,
-  align = TRUE,
-  table.layout = "l",
-  notes.align = "l",
-  notes.append = FALSE
-)
 
 # b)
 
@@ -112,6 +99,7 @@ texreg(
   float.pos = "H",
   booktabs = TRUE,
   use.packages = FALSE,
+  table = FALSE,
   label = "tab:iv_ols_hourswd",
   caption = "Dad's hours worked and fertility: OLS and IV",
 )
@@ -128,7 +116,7 @@ median_age %>% paste0(collapse = "") %>% writeLines("output/other/3_median_age.t
 data_married$age_group <- ifelse(
   data_married$agem <= median_age,
   paste0("$age \\leq ", median_age, "$"),
-  paste0("$age \\gt ", median_age, "$")
+  paste0("$age > ", median_age, "$")
   ) %>% as.factor()
                         
 data_married %>%
@@ -154,7 +142,7 @@ data_married %>%
 # b) OLS estimation on weeksm
 
 data_married_below <- data_married %>%
-  filter(agem < median_age)
+  filter(agem <= median_age)
 
 ols_model2b <- lm(weeksm ~ morekids + agem + agefstm + blackm + hispm + othracem, data = data_married_below)
 robust.se.ols_model2b <- sqrt(diag(vcovHC(ols_model2b, type = "HC")))
@@ -180,6 +168,7 @@ texreg(
   booktabs = TRUE,
   use.packages = FALSE,
   label = "tab:ols_iv_weeksm",
+  table = FALSE,
   caption = "Mother's weeks worked and fertility: OLS and IV",
 )
 
@@ -209,4 +198,3 @@ participation_text <- sprintf(
 
 # Write to file
 writeLines(participation_text, "output/other/3_participation.tex")
-
