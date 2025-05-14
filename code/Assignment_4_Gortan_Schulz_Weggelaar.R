@@ -29,6 +29,10 @@ lapply(packaged_vector_rdd, require, character.only = TRUE)
 
 
 load("code/meyersson_RDD2.RData")
+# load(paste0(
+#   rstudioapi::getActiveDocumentContext()$path %>% dirname(),
+#   "/meyersson_RDD2.RData"
+# ))
 
 # --------------------------------------------------------------
 # Question 1

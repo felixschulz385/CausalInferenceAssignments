@@ -9,6 +9,7 @@
 
 # Load the data
 rm(list = ls())
+rstudioapi::getActiveDocumentContext()$path %>% dirname() %>% dirname() %>% setwd()
 load("code/AngristEvans1980_reduced.RData")
 
 packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "broom", "broom.mixed", "jtools", "texreg", "kableExtra")
