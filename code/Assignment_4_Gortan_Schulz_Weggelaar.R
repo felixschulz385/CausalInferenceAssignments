@@ -31,7 +31,7 @@ lapply(packaged_vector_rdd, require, character.only = TRUE)
 load("code/meyersson_RDD2.RData")
 
 # --------------------------------------------------------------
-# Question 1: 
+# Question 1
 # --------------------------------------------------------------
 
 # question (a)
@@ -123,7 +123,79 @@ effects %>%
   add_header_above(c(" " = 1, "Below Median" = 2, "Above Median" = 2, "RDD Test" = 2)) %>%
   writeLines("output/tables/4_rdd_results.tex")
 
+# --------------------------------------------------------------
+# Question 2
+# --------------------------------------------------------------
+
+# question (a)
+
+pdf("output/figures/4_density_test.pdf", width = 8, height = 6)
+mccrary <- DCdensity(
+  meyersson.data$X, 
+  cutpoint=0, ext.out=TRUE,
+  plot=TRUE, verbose=FALSE)
+dev.off()
+
+paste0(
+    "The estimated log difference in heights at the cutoff is ",
+    round(mccrary$theta, 2),
+    " with a standard error of ",
+    round(mccrary$se, 2),
+    ". The p-value is ",
+    sprintf("%.2f", mccrary$p),
+    "."
+    ) %>%
+    writeLines("output/other/4_mccrary_test.txt")
+
+
+# question (b)
+
+# Run RD estimations for age share variables
+rdd_ageshr60 <- rdrobust(
+  meyersson.data$ageshr60, meyersson.data$X,
+  p = 1,
+  kernel = "triangular",
+  bwselect = "mserd"
+)
+
+rdd_ageshr19 <- rdrobust(
+  meyersson.data$ageshr19, meyersson.data$X,
+  p = 1,
+  kernel = "triangular",
+  bwselect = "mserd"
+)
+
+# Create a table of results
+age_effects <- matrix(NA, nrow = 2, ncol = 3)
+age_effects[1,1] <- rdd_ageshr60$Estimate[[1]]
+age_effects[1,2] <- rdd_ageshr60$se[[1]]
+age_effects[1,3] <- rdd_ageshr60$pv[[1]]
+age_effects[2,1] <- rdd_ageshr19$Estimate[[1]]
+age_effects[2,2] <- rdd_ageshr19$se[[1]]
+age_effects[2,3] <- rdd_ageshr19$pv[[1]]
+age_effects <- round(age_effects, 3)
+age_effects <- as.data.frame(age_effects)
+age_effects <- bind_cols(c("Age share above 60", "Age share below 19"), age_effects)
+colnames(age_effects) <- c("Variable", "Estimate", "SE", "p-value")
+
+# Output to LaTeX
+age_effects %>%
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    linesep = "",
+    caption = "RDD Estimates for Age Demographics",
+    label = "tab:age_demographics",
+    digits = 3,
+    escape = FALSE,
+    align = "c"
+  ) %>%
+  writeLines("output/tables/4_age_demographics.tex")
+
+
+# --------------------------------------------------------------
 # Question 3
+# --------------------------------------------------------------
 
 generate_simulated_data <- function(sample_size) {
   set.seed(123)

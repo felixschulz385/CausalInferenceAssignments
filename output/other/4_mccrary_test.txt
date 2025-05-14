@@ -1,0 +1,1 @@
+The estimated log difference in heights at the cutoff is 0.91 with a standard error of 0.14. The p-value is 0.00.
