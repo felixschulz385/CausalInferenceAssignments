@@ -14,7 +14,8 @@ rm(list = ls())
 # Define packages that you need,
 packages_vector <- c("haven", "dplyr", "tidyr", "sandwich",
                      "expss", "fBasics", "xtable", "data.table",
-                     "stargazer", "mfx", "jtools", "ggplot2")
+                     "stargazer", "mfx", "jtools", "ggplot2", 
+                     "kableExtra")
 # install.packages(packages_vector)
 lapply(packages_vector, require, character.only = TRUE)
 # RDD-specific packages
@@ -28,6 +29,99 @@ lapply(packaged_vector_rdd, require, character.only = TRUE)
 
 
 load("code/meyersson_RDD2.RData")
+
+# --------------------------------------------------------------
+# Question 1: 
+# --------------------------------------------------------------
+
+# question (a)
+
+below_income <- meyersson.data %>% 
+  filter(anhinc99 < median(anhinc99, na.rm = TRUE)) %>%
+  tibble()
+
+above_income <- meyersson.data %>% 
+  filter(anhinc99 >= median(anhinc99, na.rm = TRUE)) %>%
+  tibble()
+
+rdd_below <- rdrobust(
+  below_income$Y, below_income$X,
+  p = 1,
+  kernel = "triangular",
+  bwselect = "mserd"
+)
+
+rdd_above <- rdrobust(
+  above_income$Y, above_income$X,
+  p = 1,
+  kernel = "triangular",
+  bwselect = "mserd"
+)
+
+# question (b)
+
+COVS_below <- COVS[meyersson.data$anhinc99 < median(meyersson.data$anhinc99, na.rm = TRUE), ]
+COVS_above <- COVS[meyersson.data$anhinc99 >= median(meyersson.data$anhinc99, na.rm = TRUE), ]
+
+rdd_below_covs <- rdrobust(
+  below_income$Y, below_income$X, covs = COVS_below,
+  p = 1,
+  kernel = "triangular",
+  bwselect = "mserd"
+)
+
+rdd_above_covs <- rdrobust(
+  above_income$Y, above_income$X, covs = COVS_above,
+  p = 1,
+  kernel = "triangular",
+  bwselect = "mserd"
+)
+
+# question (d)
+
+rdd_test <- rdrobust(
+  meyersson.data$anhinc99, meyersson.data$X,
+  p = 1,
+  kernel = "triangular",
+  bwselect = "mserd"
+)
+
+# ggplot(meyersson.data) +
+#   geom_jitter(aes(x = X, y = anhinc99), alpha = 0.5)
+
+# output table of results (coef, se)
+effects <- matrix(NA, nrow = 2, ncol = 6) # Changed from 4 to 6 columns
+effects[1,1] <- rdd_below$Estimate[[1]]
+effects[1,2] <- rdd_below$se[[1]]
+effects[1,3] <- rdd_above$Estimate[[1]]
+effects[1,4] <- rdd_above$se[[1]]
+effects[1,5] <- rdd_test$Estimate[[1]]  # Added test columns
+effects[1,6] <- rdd_test$se[[1]]        # Added test columns
+effects[2,1] <- rdd_below_covs$Estimate[[1]]
+effects[2,2] <- rdd_below_covs$se[[1]]
+effects[2,3] <- rdd_above_covs$Estimate[[1]]
+effects[2,4] <- rdd_above_covs$se[[1]]
+effects[2,5] <- NA  # No test with covariates
+effects[2,6] <- NA  # No test with covariates
+effects <- round(effects, 2)
+effects <- as.data.frame(effects)
+effects <- bind_cols(c("Without covariates", "With covariates"), effects)
+colnames(effects) <- c("", "Estimate", "SE", "Estimate", "SE", "Estimate", "SE")
+
+# output to LaTeX
+effects %>%
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    linesep = "",
+    caption = "RDD Estimates for Below and Above Median Income",
+    label = "tab:rdd_results",
+    digits = 2,
+    escape = FALSE,
+    align = "c"
+  ) %>%
+  add_header_above(c(" " = 1, "Below Median" = 2, "Above Median" = 2, "RDD Test" = 2)) %>%
+  writeLines("output/tables/4_rdd_results.tex")
 
 # Question 3
 
