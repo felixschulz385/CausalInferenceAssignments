@@ -62,6 +62,7 @@ rdd_above <- rdrobust(
   bwselect = "mserd"
 )
 
+
 # question (b)
 
 COVS_below <- COVS[meyersson.data$anhinc99 < median(meyersson.data$anhinc99, na.rm = TRUE), ]
@@ -89,6 +90,7 @@ rdd_test <- rdrobust(
   kernel = "triangular",
   bwselect = "mserd"
 )
+
 
 # ggplot(meyersson.data) +
 #   geom_jitter(aes(x = X, y = anhinc99), alpha = 0.5)
