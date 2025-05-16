@@ -90,6 +90,7 @@ rdd_test <- rdrobust(
   kernel = "triangular",
   bwselect = "mserd"
 )
+plot(meyersson.data$X, meyersson.data$anhinc99)
 
 
 # ggplot(meyersson.data) +
@@ -171,6 +172,7 @@ rdd_ageshr19 <- rdrobust(
   bwselect = "mserd"
 )
 
+plot(meyersson.data$X, meyersson.data$ageshr19)
 # Create a table of results
 age_effects <- matrix(NA, nrow = 2, ncol = 3)
 age_effects[1,1] <- rdd_ageshr60$Estimate[[1]]
