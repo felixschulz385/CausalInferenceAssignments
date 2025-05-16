@@ -28,11 +28,9 @@ packaged_vector_rdd <- c("lpdensity", # Local Polynomial Density Estimation and 
 lapply(packaged_vector_rdd, require, character.only = TRUE)
 
 
+#rstudioapi::getActiveDocumentContext()$path %>% dirname() %>% dirname() %>% setwd()
 load("code/meyersson_RDD2.RData")
-# load(paste0(
-#   rstudioapi::getActiveDocumentContext()$path %>% dirname(),
-#   "/meyersson_RDD2.RData"
-# ))
+
 
 # --------------------------------------------------------------
 # Question 1
@@ -82,7 +80,9 @@ rdd_above_covs <- rdrobust(
   bwselect = "mserd"
 )
 
-# question (d)
+
+
+# question (e)
 
 rdd_test <- rdrobust(
   meyersson.data$anhinc99, meyersson.data$X,
