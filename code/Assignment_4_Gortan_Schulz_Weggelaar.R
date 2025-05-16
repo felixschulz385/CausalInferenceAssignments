@@ -208,7 +208,7 @@ age_effects %>%
 generate_simulated_data <- function(sample_size) {
   set.seed(123)
   # Generate error term 
-  e_sim <- rnorm(sample_size, mean = 0, sd = 50)
+  e_sim <- rnorm(sample_size, mean = 0, sd = sqrt(50))
   # Generate running variable 
   X_sim <- runif(sample_size, min = -50, max = 50)
   # Makes a data frame
