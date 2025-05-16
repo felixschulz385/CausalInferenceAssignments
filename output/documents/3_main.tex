@@ -11,6 +11,15 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage[a4paper, margin=.9in]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
+\tikzset{
+    -Latex,auto,node distance =1 cm and 1 cm,semithick,
+    state/.style ={ellipse, draw, minimum width = 0.7 cm},
+    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+    bidirected/.style={Latex-Latex,dashed},
+    el/.style = {inner sep=2pt, align=left, sloped}
+}
 
 \setlength{\droptitle}{-7.5em}
 
@@ -27,6 +36,22 @@
 
 \maketitle
 
+\begin{table}[htbp]
+  \footnotesize
+  \centering
+  \begin{minipage}{0.6\textwidth}
+    \centering
+    \input{output/tables/3_iv_ols_hourswd} % replace with your actual table file or content
+    \caption{Dad's hours worked and fertility: OLS and IV}
+  \end{minipage}
+  \hspace{.5cm}
+  \begin{minipage}{0.3\textwidth}
+    \centering
+    \input{output/tables/3_iv_ols_weeksm} % replace with your actual table file or content
+    \caption{Mother's weeks worked and fertility: OLS and IV}
+  \end{minipage}
+\end{table}
+
 \section*{Instrumental Variables}
 
 \subsection*{Question 1}
@@ -36,36 +61,36 @@
 
 The father has a much higher income than the mother. This hints a division in which the father works outside the household, while the mother is responsible for domestic chores and childcare.
 
-\input{output/tables/3}
+\input{output/tables/3_parents_stats}
 
 \paragraph*{(d)}
-
-\input{output/tables/3_iv_ols_hourswd}
 % Compare and comment on the different approaches in points (b) and (c) the 2SLS estimates you obtained in points (b) and (c) the estimates from the first stages in points (b) and (c)
 
-The variable used in (b) is a weighted average of the variables used in (c). The assumption of exogeneity should therefore hold in both setups. Due to the large uncertainty in both the second stage estimates, we abstain from interpreting the small observed difference in point estimates. First stage results are highly significant for both, showing that more couples seek to have another child after having two girls compared to two boys.
+The instrument used in (b) is a weighted average of the variables used in (c). The assumption of exogeneity should therefore hold in both setups. Due to the large uncertainty in both the second stage estimates, we abstain from interpreting the small observed difference in point estimates. First stage results are highly significant for both, additionally showing that more couples seek to have another child after having two girls compared to two boys.
 
 \paragraph*{(e)}
 % Compare the OLS estimate to the 2SLS you got before and also the respective standard errors. What do you conclude? Which one would you use for inference?
 
-Similar to the IV approach, the OLS regression does not yield a statistically significant result. While the sign of the estimate is the opposite of the above, this cannot be interpreted with confidence. Still, the IV approach provides a more attractive causal identification and is therefore preferred.
+Similar to the IV approach, the OLS regression does not yield a statistically significant result. While the sign of the estimate is the opposite of the above, this cannot be interpreted with confidence. Still, the IV approach provides an attractive causal identification and is therefore preferred.
 
 \subsection*{Question 2}
-
-\paragraph*{(a)}
 
 \input{output/tables/3_children_age_group}
 
 \paragraph*{(b)}
-% Why would you control specifically for these variables? Are these control variables sufficient to alleviate potential endogeneity concerns? Why yes or why not? 
+% age, age at first birth, black, hispanic, and other race. Why would you control specifically for these variables? Are these control variables sufficient to alleviate potential endogeneity concerns? Why yes or why not? 
+
+The central endogeneity concern is that labor market participation might be caused by some confounding factors. The most likely candidates are controlled for here: Older women are more likely to have children, but also to work. Women that got children at a young age are more likely to have foregone education and therefore less likely to work. Race-specific culture is also likely to confound. However, there might still be endogeneity concerns. Although these variables are likely correlated with our controls, we do not completely observe general attitude toward work/leisure balance and access to child support, making the IV approach more attractive.
 
 \paragraph*{(c)}
 % Compare your results to the OLS estimates and comment. 
 
-\input{output/tables/3_iv_ols_weeksm}
+While strongly negative and highly statistically significant when using OLS, the point estimate for fertility is, after instrumenting it with the $\text{samesex}$ variable, statistically insignificant. The IV LATE shows that we cannot causally identify an impact of fertility on labor market participation and that effects are likely due to other characteristics of the mother causing both variables at the same time.
 
 \paragraph*{(d)}
 % Why might the sample restrictions you imposed (women below the median age) be problematic for the 2SLS approach? 
+
+Restricting the sample to women below the median age can weaken the first stage because younger women may not have completed their fertility decisions yet. This weakens the predictive power of the instrument (same-sex first two children) and risks weak instrument bias. It also introduces sample selection bias, making the 2SLS estimates less representative of the full population.
 
 \section*{Question 3}
 
@@ -78,15 +103,21 @@ Similar to the IV approach, the OLS regression does not yield a statistically si
 % Based on that, discuss how you would expect the effect of fertility on male labour supply
 % in Switzerland today to differ from those in Angrist and Evans (1998).
 
+\input{output/other/3_participation}Today there may be a higher expectation for dads to help with childcare and household tasks, due to weaker gender roles now compared to before. We can observe this in the data too, since more fathers do part-time work and have lower labor participation than before. As a consequence, running the IV model with current data, would more likely yield a negative causal effect on male labor supply as a result of their partner's fertility.
+
 \paragraph*{(b)}
 % (Task description)
 % Discuss how you would use a 2SLS approach to estimate the effect of fertility
 % on labour supply in Switzerland today.
 
+We notice that the fertility rate in Switzerland today (1.4) is smaller compared to the estimates of the fertility rate in the US in the eighties (1.8). We therefore think it is more appropriate to use, as instrument in the first stage, their $Twins-2$, since the rationale that the authors bring forward to support the $Same\ Sex$ instrument, i.e. the willingness to diversify the sexes of the kids, might not apply anymore. However, the $Twin-2$ channel might still be present. This is especially true if the limitations for parents to have more kids is to go through the entire pregnancy cycle, which causes temporary absence from job more. In the case of twins, there is only one pregnancy cycle for two kids. Moreover, since women in Switzerland have children at a later age nowadays, we should observe a higher percentage (and so more power) of women with twins since, as the authors argue, the probability of having twins is positively correlated with age.
+
 \paragraph*{(c)}
 % (Task description)
 % Discuss how you would modify the sample restrictions that we imposed
 % in the IV lab session on the data if we were to use recent data from Switzerland.
+
+Because women get children at much higher age (the average age of the mother at the birth of the first child is 31), restricting the age of the mother to be 35 maximum is excessively tight. We should raise this upper bound.
 
 \subsection*{Question 4 (PhD Only)}
 
@@ -95,9 +126,44 @@ Similar to the IV approach, the OLS regression does not yield a statistically si
 % Which test can be performed to test for the exogeneity of the instruments in a parametric IV?
 % Explain the logic behind it, and clearly explain what hypothesis we can test.
 
+The (Hansen-Sargan) J-test assesses the exogeneity of instruments in a parametric IV setting, when multiple instruments are available. The test works by taking the fitted residuals from the two-stage least squares $\hat{u}^{TSLS}_{i}$, and run the following regression: 
+
+\begin{align}
+    \hat{u}^{TSLS}_{i} = \delta_0 + \delta_1Z_{1i} + ...+\delta_mZ_{mi} + \delta_{m+1}W_{1i}  +...+ \delta_{m+r}W_{ri} + e_i
+\end{align}
+
+Where the $Z$ are the instruments and $W$ are the exogenous regressors (control). The J-test has as null hypothesis: $H_0:\delta_1=...=\delta_m=0$, which states that all instruments are exogenous. The J-statistic takes the F-statistic such that $J=mF$, which follows a chi-square distribution $J\sim \chi^{2}_{m-k}$ with $m-k$ degrees of freedom. The intuition here is to test whether instruments explain any variation in the dependent variable (through the residuals) beyond the channel of the endogenous variable. We could observe this if any of the $\hat{\delta_i}$ are significantly different from zero.
+
+
+% \begin{figure}[h!]
+% \centering
+
+% \begin{tikzpicture}
+%     % x node set with absolute coordinates
+%     \node[state] (x) at (0,0) {$X$};
+
+%     \node[state] (y) at (2.5, 0) {$Y$};
+%     \node[state] (z) at (-2.5, 0) {$Z$};
+
+%     % Directed edge
+%     \path (x) edge (y);
+%     \draw[->, red, dashed, bend left=50] (z) to (y);
+%     \path (z) edge (x);
+
+% % in case I want to reuse: \node[state] (x) at (0,0) {$X$};
+% \end{tikzpicture}
+% \caption{Exogeneity test}
+% \label{fig:simpleDAG}
+% \end{figure}
+
+
+
 \paragraph*{(b)}
 % (Task description)
 % Under which assumptions will the test be informative about instrument validity?
+
+The test is informative about instrument validity if we assume that the model is correctly specified, and at least one of the instruments is valid. This is because the test looks into whether all instruments are jointly valid. If all are invalid, the test might fail to detect that. On the other hand, if all instruments are valid, it should correctly conclude that the instruments are exogenous. 
+
 
 \section*{Regression Discontinuity Design}
 
@@ -109,16 +175,25 @@ Similar to the IV approach, the OLS regression does not yield a statistically si
 % the author uses information on outcomes in 1990, which is before the assignment to the treatment.
 % What does he use it for and why is it in support of the identification strategy?
 
+ 1990 Census data is used for a placebo test of the RD design. Since the 1990 outcomes predate the treatment, there should be no discontinuity at the cutoff if the design is valid. The observed smooth pattern supports the identification strategy by showing that any post-election discontinuities are likely due to Islamic rule, not pre-existing differences between municipalities.
+
+
+
+
 \paragraph*{(b)}
 % (Task description)
 % The author determines the optimal bandwidth using the algorithm developed by
 % Imbens and Kalyanaraman (2012).
 % Briefly explain why it yields a smaller optimal bandwidth for women.
 
+The Imbens-Kalyanaraman rule picks the RD window that balances bias and variance for a local-linear fit. Because women’s outcome curve is more curved right at the cutoff, extending too far would add bias, so the formula squeezes their bandwidth to 0.24. The men’s curve is flatter, so the rule can keep more data (bandwidth = 0.32) without sacrificing accuracy.
+
 \paragraph*{(c)}
 % (Task description)
 % For women, the author proposes and tests a mechanism that can explain the positive RD estimate
 % (despite a negative raw correlation).
 % Explain this mechanism and comment on the test procedures.
+
+The author explains the positive RD results is driven by areas which are both poorer and more religiously conservative. These areas exhibit higher barriers to entry for women compared to men, because secular restrictions such as the headscarf ban, and mixed classes, made it more likely for parents to not send their daughters to school. Islamist municipalities would then lower these barriers to entry by not enforcing secular restrictions. This is tested by assuming heterogeneous RD treatment effects, and thus re-estimating the RD models for subsamples, where the original sample is split in two based on being above or below the median for literacy share, share of religious buildings, and islamic vote share.
 
 \end{document}
