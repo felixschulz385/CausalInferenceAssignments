@@ -1,0 +1,177 @@
+\documentclass{scrartcl}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{titling}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[a4paper, margin=.9in]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
+\tikzset{
+    -Latex,auto,node distance =1 cm and 1 cm,semithick,
+    state/.style ={ellipse, draw, minimum width = 0.7 cm},
+    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+    bidirected/.style={Latex-Latex,dashed},
+    el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\setlength{\droptitle}{-7.5em}
+
+\title{Causal Inference for Policy Evaluation\\
+\Large{Assignment 4}}
+\author{Marco Gortan, Felix Schulz, Benjamin Weggelaar}
+\date{\today}
+
+\newcommand{\marco}[1]{\textcolor{red}{#1}}
+\newcommand{\felix}[1]{\textcolor{cyan}{#1}}
+\newcommand{\benji}[1]{\textcolor{green}{#1}}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Question 1}
+
+\paragraph*{(a)}
+% Estimate the treatment effects using the RD method for municipalities above or below the median value of income. Use a linear control for the running variable and options kernel=“triangular” and bwselect=“mserd”. Do not include any covariate. Report the point estimates and s.e. for each sub-sample and explain what the options kernel=“triangular” and bwselect=“mserd” do.
+With the option \texttt{kernel="triangular"} the weights of the observations decrease linearly with distance from cutoff to trade-off between power (more observation) and bias. The option \texttt{bwselect="mserd"} chooses the bandwidth that minimizes the mean squared error for estimating the treatment effect at the cutoff.
+
+\paragraph*{(b)}
+% Repeat the estimation in point (a), but now control for all the covariates in COVS.Report the point estimates and s.e. for each sub-sample. Compare the results form point (a) and (b) and comment. Should we expect them to be similar?
+If the groups above/below the thresholds have similar characteristics, we should expect no differences when adding covariates. This is the case for the sub-sample below median income (Table \ref{tab:Ex1ab}). However, the estimates and their significance are different for the above median sub-sample, suggesting that we have discontinuity in covariates that affect the outcome.
+
+\begin{table}
+
+\caption{\label{tab:tab:rdd_results}RDD Estimates for Below and Above Median Income}
+\centering
+\begin{tabular}[t]{ccccccc}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{2}{c}{Below Median} & \multicolumn{2}{c}{Above Median} & \multicolumn{2}{c}{RDD Test} \\
+\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7}
+ & Estimate & SE & Estimate & SE & Estimate & SE\\
+\midrule
+Without covariates & 0.50 & 2.01 & 1.01 & 4.05 & -610.97 & 52.47\\
+With covariates & -0.14 & 1.59 & 5.61 & 1.90 & NA & NA\\
+\bottomrule
+\end{tabular}
+\label{tab:Ex1ab}
+\end{table}
+
+
+
+\paragraph*{(c)}
+% Meyersson argues that the treatment effect could be larger in poorer municipalities. Provide some intuition as to why this might be the case. Are the RD estimates from points (a) and (b) in line with this reasoning?
+Poorer areas are more likely to be more religiously conservative. There, Islamist municipalities would not enforce secular barriers to school entry like the headscarf ban, increasing schooling for girls. RD estimates \underline{do not} support this reasoning; actually, the specification with covariates above median income supports the opposite.   
+
+\paragraph*{(d)}
+%What would happen to your estimator if you halved the bandwidth around the cutoff?
+Halving the bandwidth around the cutoff implies that we have less observations (so less power, more variance in the estimate) but we reduce the bias that might be induce by other factors, as very close to the margin municipalities might be more similar to each other.  
+
+
+\paragraph*{(e)}
+%  Conduct a suitable check that there is no selection in terms of household income at the cutoff. Comment on the result, the validity of an RD approach, and what we can learn from the estimates in points (a) and (b)
+The group "RDD Test`` in Table \ref{tab:Ex1ab} shows the estimate of an RD regression where the dependent variable is the income of the municipality and the running variable is the winning margin. The result tells us that we have income discontinuity at the cutoff, since municipalites where the Islamic party wins by a small margin are much poorer compared to those where the Islamic party loses by a small margin, pointing to a possible electoral result manipulation in poor municipalities to favor the Islamic party. This violates the RD continuity assumption and suggests potential bias. The estimated treatment effects in (a) and (b) could partly reflect pre-existing income differences rather than the Islamic party’s victory per se.
+
+\subsection*{Question 2} % Validity checks
+
+\paragraph*{(a)}
+%  Perform the McCrary (2008) density discontinuity test for the running variable and plot the frequency of the running variable. Describe the results and explain whether they are indicative for bunching behavior
+Figure \ref{fig:threshDens} shows clear evidence of bunching behaviour. It is indeed twice more likely to find municipalities with an electoral margin slightly above than the cutoff compared to slightly lower the cutoff, suggesting possible manipulation of the running variable. In an appropriate RD design, we should instead observe a continuous line. 
+
+\paragraph*{(b)}
+%  Check whether municipalities differ in terms of the percentage of population above 60 (ageshr60) and below 19 (ageshr19) by running separate RD estimations. As in question 2, use a linear control for the running variable and options kernel=“triangular” and bwselect=“mserd”. Report the point estimates and standard errors along with the corresponding p-values. What conclusions do you draw with regard to sorting in covariates? Briefly comment
+Results are displayed in Table \ref{tab:Ex2b}. The estimate for the RDD where \textit{Age share below 19} suggest the young municipalities, i.e. those with a higher share of people wit age below 19, are those that are more likely to manipulated results. The estimate of 6.7 is indeed almost statistically significant at the 5\% level.   
+
+\begin{figure}[h!]
+  \centering
+  %---- Left: density plot ----
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{output/figures/4_density_test.pdf}
+    \captionof{figure}{Density of the running variable}
+    \label{fig:threshDens}
+  \end{minipage}
+  \hfill
+  %---- Right: RDD estimates table ----
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \captionof{table}{RDD Estimates for Age Demographics}
+    \label{tab:Ex2b}
+    \begin{tabular}{lccc}
+      \toprule
+      Variable            & Estimate & SE    & p-value\\
+      \midrule
+      Age share above 60  & -1.620   & 1.508 & 0.283\\
+      Age share below 19  &  6.722   & 3.480 & 0.053\\
+      \bottomrule
+    \end{tabular}
+  \end{minipage}
+\end{figure}
+
+\paragraph*{(c)}
+%  Given the results from (1d), (2a) and (2b), can we use an RD approach to estimate the desired treatment effect? Briefly make the case for or against the RD design by discussing the validity of each of the identifying assumptions.
+We saw that small victory margins happen in (i) poor municipalities and (ii) municipalities with a higher share of young people. These facts point towards a clear rejection of the use of the RDD method in its more simple form, i.e. the one without any control variable, because municipalities with small winning margin differ in socioeconomic characteristics compared to municipalities with small losing margin. \\
+
+However, including controls might alleviate these concerns. For instance, if we had enough observations above and below the cutoff, controlling for characteristic that we know are different across groups might still produce an unbiased estimate of the true effect. \\
+
+Said that, the biggest concern that should discourage us from using these data is the density plot of the running variable in Figure \ref{fig:threshDens}. This plot provides evidence of electoral manipulation that make the data useless for our analysis. \\ 
+
+Note that if the manipulation happened only for very close results (i.e. from margin of -0.5\% to +0.5\%) it would not be too much problematic - this data point would have still fallen inside the bandwidth. However, if the original result was much worse, like a shift from -10\% to +0.5\%, then it might be more problematic for our analysis, as the unobserved variable of the ability of a municipality to alter political results might be related to our outcome of interest.
+
+\subsection*{Question 3} % Simulation
+
+
+\paragraph*{(b)}
+%  Since we generate the data ourselves, we know the value of the treatment effect that we will then try to recover. What is the value of the treatment effect that we are interested in?
+Since $D^{sim}$ is the variable that indicates being above the cutoff, we expect the treatment effect to be $-5$.
+
+\paragraph*{(c)}
+%  Present a table with the RD point estimates, the RD s.e., the RD bandwidth, the OLS estimates and the OLS robust s.e. for a sample size of 5,000, 10,000 and 20,000. What do the results suggest about the precision of the RD estimator compared to OLS? Explain why this is the case
+The precision of the OLS estimator is always better compared to the precision of the RD estimator. This is due to the fact that (i) OLS is using the entire sample and while RD is not and (ii) the RD bandwidth also shrinks as the sample increases. Therefore, the OLS estimator converges faster to the true value. 
+
+
+\input{output/tables/4_sim_results_table}
+
+
+
+\paragraph*{(d)}
+%   Given the data generating process in point (a), is the OLS estimator biased or unbiased for the treatment effect of interest? Why? Would you use the RD or the OLS estimates from point (c) for inference?
+Given the data generating process, the OLS estimator in an unbiased estimator of the treatment effect of interest since we are estimating a model that we know is a the base of the data generating process. \\
+
+For inference, when we are interested in predicting values that might fall outside the bandwidth, it is better to use OLS, which fits the parameters using all the observations.
+
+
+\subsection*{Question 4} % PhD only 
+
+\paragraph*{(a)}
+%   How would you define the running variable based on this data and how would this coarser measurement affect its quality? Could you still estimate a valid RDD effect? Explain why or why not
+
+We can construct the running variable the same way as before, namely: Win/loss margin = vote share of the Islamic party, minus vote share of the secular party. This coarser measurement reduces precision and turns a continuous running variable into a discrete one with gaps (e.g., -4\%, -2\%, 0\%, +2\%, etc.).  \\
+
+We are still able to retrieve a sharp RDD, because for margins that are rounded to 0\%, we can complement our data with information on the winner of the election (since this information is public). Therefore, even for margins at 0\%, we can still allocate the winners (Islamic parties) to the right part of the cutoff and losers to the left part. This could be achieved by creating a dummy variable. \\
+
+Nevertheless, this reduces the quality of estimation by limiting the capacity to detect minor variations close to the cutoff (0\%). Moreover, cases where the original true margin is the same will be put into different rounded margins (e.g. [i] 37.1\% vs 36.9\% and [ii] 38.1\% vs 37.9\%). RDD is still valid as the \textit{SUTVA} and the \textit{Local Continuity} assumption are still valid.
+
+\paragraph*{(b)}
+%   Would your conclusion change if you did not need to construct the running variable yourself but got it delivered as a rounded variable by the statistical office (still in increments of 2 percentage points)? Would the quality of your estimates be affected by the coarser measurement and if yes, how?
+
+We note that the individual electoral results will be put in different margin levels. Suppose for instance that Party A gets 37.4 and Party B gets 36.8. In case Q4A we would end up with a 2\% margin while in case Q4B we would end up with a 0\% margin. The opposite happens if Party A gets 36.9\% and Party B gets 35.1\%. \\
+
+Therefore, we reach similar conclusion as in Q4A because, with a large number of municipalities, we expect that two opposite effects balance out.
+
+
+(Answer Benji): 
+
+
+
+\end{document}
