@@ -8,7 +8,8 @@
 # --------------------------------------------------------------
 Sys.setlocale("LC_TIME", "C")  
 packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "broom", "broom.mixed", 
-                     "jtools", "texreg", "kableExtra", "rstudioapi", "lubridate")
+                     "jtools", "texreg", "kableExtra", "rstudioapi", "lubridate", "ggplot2", 
+                     "knitr", "kableExtra")
 # Load necessary libraries
 lapply(packages.vector, require, character.only = TRUE)
 # Load the data
@@ -88,4 +89,53 @@ descriptive_stats <- data %>%
     .groups = 'drop'
   )
 
-descriptive_stats
+descriptive_tbl <- descriptive_stats %>%
+  mutate(
+    mean_employed      = mean_employed  * 100,
+    mean_sex           = mean_sex       * 100,
+    mean_marits        = mean_marits    * 100,
+    mean_childs        = mean_childs    * 100,
+    mean_duration      = mean_duration,          # leave in days
+    mean_age           = mean_age,               # years
+    mean_earn          = mean_earn,              # currency
+    mean_rate          = mean_rate,              # %
+    mean_contr_2y      = mean_contr_2y           # months
+  ) %>%
+  # round to one decimal place
+  mutate(across(starts_with("mean_"), ~round(.x, 1))) %>%
+  # rename for nicer column headers
+  rename(
+    Treatment            = treat_group,
+    `Post`    = post,
+    `Dur. (days)`    = mean_duration,
+    `Empl. 1Y (%)`   = mean_employed,
+    N                = n,
+    `Age (yrs)`      = mean_age,
+    `Female (%)`     = mean_sex,
+    `Married (%)`    = mean_marits,
+    `Earnings`       = mean_earn,
+    `Act. rate (%)`  = mean_rate,
+    `Child sub. (%)` = mean_childs,
+    `Contr. 2y (m)`  = mean_contr_2y
+  )
+
+# 2) Print to LaTeX with group headers
+desc_stat = descriptive_tbl %>%
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    linesep = "",
+    caption = "Descriptive Statistics by Treatment Group and Period",
+    label   = "tab:desc_stats"
+  ) %>%
+  add_header_above(c(
+    " " = 2,
+    "Unemployment" = 2,
+    "Demographics" = 3,
+    "Economic"     = 2,
+    "Other"        = 3
+  )) %>%
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
+# Write to file
+writeLines(desc_stat, "output/tables/final_desc_stat.tex")
