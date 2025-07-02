@@ -12,6 +12,9 @@
 \usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{multicol}
+\usepackage{wrapfig}
+
 \usepackage[a4paper, margin=.9in]{geometry}
 \usepackage{tikz}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
@@ -86,33 +89,30 @@ The group "RDD Test`` in Table \ref{tab:Ex1ab} shows the estimate of an RD regre
 
 \paragraph*{(a)}
 %  Perform the McCrary (2008) density discontinuity test for the running variable and plot the frequency of the running variable. Describe the results and explain whether they are indicative for bunching behavior
-Figure \ref{fig:threshDens} shows clear evidence of bunching behaviour. It is indeed twice more likely to find municipalities with an electoral margin slightly above than the cutoff compared to slightly lower the cutoff, suggesting possible manipulation of the running variable. In an appropriate RD design, we should instead observe a continuous line. 
+Figure \ref{fig:threshDens} shows clear evidence of bunching behaviour. \input{output/other/4_mccrary_test.txt}It is indeed twice more likely to find municipalities with an electoral margin slightly above than the cutoff compared to slightly lower the cutoff, suggesting possible manipulation of the running variable. In an appropriate RD design, we should instead observe a continuous line. 
 
 \paragraph*{(b)}
 %  Check whether municipalities differ in terms of the percentage of population above 60 (ageshr60) and below 19 (ageshr19) by running separate RD estimations. As in question 2, use a linear control for the running variable and options kernel=“triangular” and bwselect=“mserd”. Report the point estimates and standard errors along with the corresponding p-values. What conclusions do you draw with regard to sorting in covariates? Briefly comment
-Results are displayed in Table \ref{tab:Ex2b}. The estimate for the RDD where \textit{Age share below 19} suggest the young municipalities, i.e. those with a higher share of people wit age below 19, are those that are more likely to manipulated results. The estimate of 6.7 is indeed almost statistically significant at the 5\% level.   
+Results are displayed in Table \ref{tab:Ex2b}. The estimate for the RDD for \textit{Age share below 19} suggest the young municipalities, i.e. those with a higher share of people with age below 19, are those that are more likely to manipulated results. The estimate of 6.7 is indeed almost statistically significant at the 5\% level.   
 
-\begin{figure}[h!]
-  \centering
-  %---- Left: density plot ----
-  \begin{minipage}[t]{0.48\textwidth}
+\begin{figure}
+  \begin{minipage}[b]{.45\linewidth}
     \centering
     \includegraphics[width=\linewidth]{output/figures/4_density_test.pdf}
     \captionof{figure}{Density of the running variable}
     \label{fig:threshDens}
-  \end{minipage}
-  \hfill
-  %---- Right: RDD estimates table ----
-  \begin{minipage}[t]{0.48\textwidth}
+  \end{minipage}\hfill
+  \begin{minipage}[b]{.45\linewidth}
     \centering
-    \captionof{table}{RDD Estimates for Age Demographics}
+    \captionof{table}{RDD estimates for age demographics}
     \label{tab:Ex2b}
+    \vspace{.5em}                   % small gap between caption and tabular
     \begin{tabular}{lccc}
       \toprule
-      Variable            & Estimate & SE    & p-value\\
+      Variable            & Estimate & SE    & $p$-value\\
       \midrule
-      Age share above 60  & -1.620   & 1.508 & 0.283\\
-      Age share below 19  &  6.722   & 3.480 & 0.053\\
+      Age share $\ge 60$  & –1.620   & 1.508 & 0.283\\
+      Age share $\le 19$  &  6.722   & 3.480 & 0.053\\
       \bottomrule
     \end{tabular}
   \end{minipage}
@@ -120,13 +120,7 @@ Results are displayed in Table \ref{tab:Ex2b}. The estimate for the RDD where \t
 
 \paragraph*{(c)}
 %  Given the results from (1d), (2a) and (2b), can we use an RD approach to estimate the desired treatment effect? Briefly make the case for or against the RD design by discussing the validity of each of the identifying assumptions.
-We saw that small victory margins happen in (i) poor municipalities and (ii) municipalities with a higher share of young people. These facts point towards a clear rejection of the use of the RDD method in its more simple form, i.e. the one without any control variable, because municipalities with small winning margin differ in socioeconomic characteristics compared to municipalities with small losing margin. \\
-
-However, including controls might alleviate these concerns. For instance, if we had enough observations above and below the cutoff, controlling for characteristic that we know are different across groups might still produce an unbiased estimate of the true effect. \\
-
-Said that, the biggest concern that should discourage us from using these data is the density plot of the running variable in Figure \ref{fig:threshDens}. This plot provides evidence of electoral manipulation that make the data useless for our analysis. \\ 
-
-Note that if the manipulation happened only for very close results (i.e. from margin of -0.5\% to +0.5\%) it would not be too much problematic - this data point would have still fallen inside the bandwidth. However, if the original result was much worse, like a shift from -10\% to +0.5\%, then it might be more problematic for our analysis, as the unobserved variable of the ability of a municipality to alter political results might be related to our outcome of interest.
+We observe that small victory margins happen in (i) poor municipalities and (ii) municipalities with a higher share of young people. Discontinuities in wealth or age imply that municipalities barely won by the Islamic party differ \emph{ex ante} from barely losing ones. In other words, treatment is no longer “as good as randomly assigned” in a neighborhood of the cutoff. If the manipulation is solely along observables, including controls might alleviate these concerns. Given that this is highly unlikely, the observation of this bunching behavior leads us to conclude that a naïve RDD application is invalid. 
 
 \subsection*{Question 3} % Simulation
 
@@ -134,7 +128,7 @@ Note that if the manipulation happened only for very close results (i.e. from ma
 \paragraph*{(b)}
 %  Since we generate the data ourselves, we know the value of the treatment effect that we will then try to recover. What is the value of the treatment effect that we are interested in?
 Since $D^{sim}$ is the variable that indicates being above the cutoff, we expect the treatment effect to be $-5$.
-
+ 
 \paragraph*{(c)}
 %  Present a table with the RD point estimates, the RD s.e., the RD bandwidth, the OLS estimates and the OLS robust s.e. for a sample size of 5,000, 10,000 and 20,000. What do the results suggest about the precision of the RD estimator compared to OLS? Explain why this is the case
 The precision of the OLS estimator is always better compared to the precision of the RD estimator. This is due to the fact that (i) OLS is using the entire sample and while RD is not and (ii) the RD bandwidth also shrinks as the sample increases. Therefore, the OLS estimator converges faster to the true value. 
@@ -146,7 +140,7 @@ The precision of the OLS estimator is always better compared to the precision of
 
 \paragraph*{(d)}
 %   Given the data generating process in point (a), is the OLS estimator biased or unbiased for the treatment effect of interest? Why? Would you use the RD or the OLS estimates from point (c) for inference?
-Given the data generating process, the OLS estimator in an unbiased estimator of the treatment effect of interest since we are estimating a model that we know is a the base of the data generating process. \\
+Given the data generating process, the OLS estimator in an unbiased estimator of the treatment effect of interest since we are estimating a model that we know is at the base of the data generating process. \\
 
 For inference, when we are interested in predicting values that might fall outside the bandwidth, it is better to use OLS, which fits the parameters using all the observations.
 
@@ -156,21 +150,43 @@ For inference, when we are interested in predicting values that might fall outsi
 \paragraph*{(a)}
 %   How would you define the running variable based on this data and how would this coarser measurement affect its quality? Could you still estimate a valid RDD effect? Explain why or why not
 
-We can construct the running variable the same way as before, namely: Win/loss margin = vote share of the Islamic party, minus vote share of the secular party. This coarser measurement reduces precision and turns a continuous running variable into a discrete one with gaps (e.g., -4\%, -2\%, 0\%, +2\%, etc.).  \\
+We can construct the running variable the same way as before. Namely, the win/loss margin is the vote share of the Islamic party minus the vote share of the secular party. The coarser measurement reduces precision and turns a continuous running variable into a discrete one with gaps (e.g., -4\%, -2\%, 0\%, +2\%, etc.). We are still able to retrieve a sharp RDD, because for margins that are rounded to 0\%, we can complement our data with information on the winner of the election (since this information is public). Therefore, even for margins at 0\%, we can still allocate the winners (Islamic parties) to the right part of the cutoff and losers to the left part. This could be achieved by creating a dummy variable. Nevertheless, we believe this reduces the precision of the estimate, and causes bias. The rounding causes measurement error that increases the standard error. Furthermore, we believe it causes a biased estimate due to endogeneity. Suppose that instead of observing the true variable \( x_i^* \), what is actually observed is 
 
-We are still able to retrieve a sharp RDD, because for margins that are rounded to 0\%, we can complement our data with information on the winner of the election (since this information is public). Therefore, even for margins at 0\%, we can still allocate the winners (Islamic parties) to the right part of the cutoff and losers to the left part. This could be achieved by creating a dummy variable. \\
+\[
+x_i = x_i^* + \nu_i
+\]
 
-Nevertheless, this reduces the quality of estimation by limiting the capacity to detect minor variations close to the cutoff (0\%). Moreover, cases where the original true margin is the same will be put into different rounded margins (e.g. [i] 37.1\% vs 36.9\% and [ii] 38.1\% vs 37.9\%). RDD is still valid as the \textit{SUTVA} and the \textit{Local Continuity} assumption are still valid.
+where \( \nu_i \) is the measurement error caused by the rounding. In this case, a model given by
+
+\[
+y_i = \alpha + \beta x_i^* + \varepsilon_i
+\]
+
+can be written in terms of observables and error terms as:
+\begin{align*}
+y_i &= \alpha + \beta (x_i - \nu_i) + \varepsilon_i 
+ =  \alpha + \beta x_i + (\varepsilon_i - \beta \nu_i) \\
+    &= \alpha + \beta x_i + u_i \quad \text{(where } u_i = \varepsilon_i - \beta \nu_i \text{)}
+\end{align*}
+
+Since both \( x_i \) and \( u_i \) depend on \( \nu_i \), they are correlated. This violates the OLS assumption that the regressors are uncorrelated with the error term. As a result, the estimation of \( \beta \) will be biased.
+
 
 \paragraph*{(b)}
 %   Would your conclusion change if you did not need to construct the running variable yourself but got it delivered as a rounded variable by the statistical office (still in increments of 2 percentage points)? Would the quality of your estimates be affected by the coarser measurement and if yes, how?
 
-We note that the individual electoral results will be put in different margin levels. Suppose for instance that Party A gets 37.4 and Party B gets 36.8. In case Q4A we would end up with a 2\% margin while in case Q4B we would end up with a 0\% margin. The opposite happens if Party A gets 36.9\% and Party B gets 35.1\%. \\
-
-Therefore, we reach similar conclusion as in Q4A because, with a large number of municipalities, we expect that two opposite effects balance out.
+In question 4a) we receive the rounded electoral votes shares, and can construct the running variable by taking the difference. In this new scenario, we are not sure whether the margins were first rounded and then the difference was taken (option 1), or the other way around (option 2). In order to explore if this would change the measurement error in anyway, we slightly change the simulation exercise in 3, in order to simulate the two voter shares separately. Figure 2 shows how the measurement error differs between the two ways of constructing the running variable: 
 
 
-(Answer Benji): 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{output/figures/rounding_error.png}
+    \caption{Differences in simulated measurement errors}
+    \label{fig:your_label}
+\end{figure}
+
+Although the shape is different, the expected values of the errors would be the same and we still have $Cov(x_i,u_i) \neq 0$, causing endogeneity. Therefore, we believe the quality of the estimate to remain the same. 
+
 
 
 
