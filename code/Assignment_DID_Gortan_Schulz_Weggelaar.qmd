@@ -1,0 +1,171 @@
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(lfe)
+library(sandwich)
+```
+
+```{r}
+data <- read_csv("code/data_did_panel_swiss.csv")
+
+data <- data %>%
+    mutate(
+        across(c(date_start, date_end), ~ dmy(.x))
+        )
+
+data[["time"]] <- data$date_start
+day(data$time) <- 1
+
+# turn into integer period
+data[["period"]] <- round((dmy("01012011") %--% data$time) / dmonths(1))
+event_period <- round((dmy("01012011") %--% dmy("01012013")) / dmonths(1))
+# create event time
+data[["event_time"]] <- data$period - event_period
+```
+
+#### 1
+
+Option 1:
+
+We define the treatment group to be those unemployment spells in the data who are eligible for the program. This is all spells starting in 2013-2015 for workers who are already ≥ 45 years old at entry. The control group is made up of those never eligible to enrol, meaning those unemployment spells for workers < 45 years old over the same calendar window. The assumption is that the younger group would have experienced similar trends in unemployment outcomes as the older group, had they been eligible for the program, making it a valid counterfactual for how outcomes would have evolved for the older group in the absence of the program. 
+
+Option 2:
+
+Since we know about treatment adoption, we define the treatment group to be those unemployment spells in the data during which the individual participates in the program. The definition of the control group is considerably harder. Since there is qualitative evidence for selection, we have to be careful to include those eligible (meaning 45 old at entry intro unemployment) since their potential benefits from treatment might be lower, violating the parallel trends assumption. We therefore define the control group to be those unemployment spells for individuals who are not eligible for the program, meaning those < 45 years old at entry into unemployment.
+
+Combined:
+
+There is two things we might estimate: The intent-to-treat effect (ITT) of the program or the average treatment effect on the treated (ATT). Since there is qualitative evidence for selection, our preferred model is the ITT. For the latter, we define the treatment group as those workers who are already ≥ 45 years old at the start of their spell, i.e. those newly eligible for the program, regardless of whether they actually enrol. Further, we define the control group as analogous spells for workers < 45 years old, who are never eligible. 
+
+```{r}
+data %>% select(treat) %>% summary()
+
+data <- data %>%
+    mutate(
+        eligible = (age >= 45) * 1,
+        post = (date_start >= dmy("01012013")) * 1,
+        )
+```
+
+#### 2)
+
+```{r}
+data <- data %>% 
+    mutate(
+        unempl_dur = (date_start %--% date_end) / ddays(1),
+        employed_12m = (((date_start %--% date_end) / dyears(1)) < 1) * 1
+    )
+```
+
+```{r}
+data %>% 
+    group_by(eligible, post) %>%
+    summarise(
+        across(c(unempl_dur, employed_12m), \(x) mean(x, na.rm = TRUE))
+        )
+
+data %>% select(date_start) %>% summary()
+```
+
+#### 3)
+
+We find that the length of unemployment spells is on average higher for those eligible for the program. After 2013, the duration of unemployment spells increased significantly for those not eligible while it slightly decreased for the target group of the program.
+
+Equivalently, the probability of being employed 12 months after the start of the unemployment spell is lower for those eligible for the program. After 2013, this probability decreased for those not eligible while it increased for the target group of the program.
+
+#### 4)
+
+In order to estimate the DID model, we need to make the stable unit treatment assumption (SUTVA), the parallel trends assumption, and the no anticipation assumption. Formally, we assume
+
+$$
+Y_{i,t} = D_i Y^*_{1,t} + (1 - D_i) Y^*_{0,t}
+$$
+
+$$
+E[Y^*_{1,0} - Y^*_{0,0}| D = 0] = E[Y^*_{1,0} + Y^*_{0,0} | D = 1] = 0
+$$
+
+$$
+E[Y^*_{0,1} - Y^*_{0,0} | D = 0] = E[Y^*_{0,1} - Y^*_{0,0} | D = 1]
+$$
+
+#### 5)
+
+```{r}
+# do we plot start dates on the x-axis?
+plot_data <- plot_data %>%
+    group_by(
+        date_start, 
+        eligible = as.logical(eligible)
+        ) %>% 
+    summarise(
+        across(c(unempl_dur, employed_12m), \(x) mean(x, na.rm = TRUE))
+        ) %>%
+    ungroup() %>%
+    arrange(eligible, date_start) %>%
+    # elongate outcomes
+    pivot_longer(
+        cols = c(unempl_dur, employed_12m), 
+        names_to = "outcome", 
+        values_to = "value"
+    )
+
+ggplot(plot_data) +
+    geom_point(aes(x = date_start, y = value, color = eligible)) +
+    #scale_color_manual(values = c(0, 1), labels = c("Not eligible" = "red", "Eligible" = "blue")) +
+    facet_wrap(~ outcome, scales = "free_y") +
+    theme_bw()
+````
+
+This shows that our data only includes information on some unemployments in both 2011 and 2015. In addition to the overall differences discussed for task 3, we find that in 2011, there was a common positive trend in unemployment duration.
+
+#### 6)
+
+The standard event study approach estimates the effect of treatment at different points in time relative to the treatment event. In our case, we have a single outcome endline per unit. This requires a different approach: We 
+
+```{r}#
+normalized_times <- c(-24:-14, 24:35)
+event_time_dummies <- map_dfc(normalized_times, \(x) data$eligible * ((data$event_time == x) * 1)) %>%
+`colnames<-`(paste0("treat_", normalized_times))
+
+event_study_data <- data %>% bind_cols(event_time_dummies)
+
+event_study_formula <- as.formula(paste0("unempl_dur ~ eligible + ", paste(paste0("`", "treat_", normalized_times, "`"), collapse = " + "), " + as.factor(event_time)"))
+
+event_study <- lm(event_study_formula, data = event_study_data)
+
+coefs <- coef(event_study)[1:length(coef(event_study))]
+ses <- sqrt(vcov(event_study) %>% diag())[1:length(coef(event_study))]
+
+plot_data <- tibble(
+    event_time = data %>% select(event_time) %>% unique() %>% pull() %>% sort(),
+    coef = coefs,
+    ci_low = coefs - 1.96 * ses,
+    ci_high = coefs + 1.96 * ses
+)
+
+ggplot(plot_data) +
+    geom_point(aes(x = event_time, y = coef)) +
+    geom_errorbar(aes(x = event_time, ymin = ci_low, ymax = ci_high))
+
+```
+
+```{r}
+data <- data %>%
+    mutate(
+        G = ifelse(eligible == 1, event_period, 0)
+    )
+example_attgt <- att_gt(yname = "unempl_dur",
+                        tname = "period",
+                        idname = "id",
+                        gname = "G",
+                        data = data,
+                        panel = FALSE
+                        )
+
+ggdid(example_attgt)
+aggte(example_attgt, type = "simple")
+```
+
