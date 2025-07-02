@@ -403,7 +403,7 @@ data <- data %>%
 
 hist_age = ggplot(data %>% filter(post == 1), aes(x = age, fill = Group)) +
   geom_histogram(
-    position = "identity",  # overlay
+    position = "stack",  # overlay
     alpha    = 0.4,         # see through
     bins     = 30           # or choose binwidth = 1
   ) +
@@ -419,3 +419,53 @@ ggsave("output/figures/final_histogram_age.jpg", plot = hist_age, width = 8.5, h
 
 # ----------
 
+# ----------
+# Question 7
+# ----------
+# Implement the DiD using OLS. Describe in detail what you do and why. Discuss whether or
+# not you need additional control variables and if so, why. Discuss the results. [8 points]
+
+ols_results <- lm(unempl_duration ~ treat_group * post, data)
+ols_vcov_clustered <- vcovCL(ols_results, cluster = ~ id)
+ols_se <- sqrt(diag(ols_vcov_clustered))
+ols_t <- coef(ols_results) / ols_se
+ols_p <- 2 * pt(-abs(ols_t), df = df.residual(ols_results))
+
+ols_covariates_results <- lm(
+  unempl_duration ~ treat_group * post + 
+    age + sex + marits + insured_earn + lastj_rate +
+    child_subsidies + contr_2y,
+  data = data
+)
+ols_covariates_vcov_clustered <- vcovCL(ols_covariates_results, cluster = ~ id)
+ols_covariates_se <- sqrt(diag(ols_covariates_vcov_clustered))
+ols_covariates_t <- coef(ols_covariates_results) / ols_covariates_se
+ols_covariates_p <- 2 * pt(-abs(ols_covariates_t), df = df.residual(ols_covariates_results))
+
+
+# Output the results
+stargazer(
+  list(ols_results, ols_covariates_results),
+  se = list(ols_vcov_clustered, ols_covariates_vcov_clustered),
+  t = list(ols_t, ols_covariates_t),
+  p = list(ols_p, ols_covariates_p),
+  type = "latex",
+  out = "output/tables/final_ols_results.tex",
+  title = "OLS Results for Unemployment Duration",
+  dep.var.labels = "Unemployment Duration (days)",
+  covariate.labels = c("Treated", "Post", "Treated * Post"),
+  omit.stat = c("f", "ser"),
+  add.lines = list(
+    c("Observations", nrow(data)),
+    c("R-squared", round(summary(ols_results)$r.squared, 3))
+  )
+)
+
+# ----------
+
+# ----------
+# Question 8
+# ----------
+# Implement the DiD using a semi-parametric estimator based on the propensity score. Describe
+# in detail what you do and why. Discuss the results and compare them to the OLS estimates.
+# [10 points]
