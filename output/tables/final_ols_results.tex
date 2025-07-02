@@ -1,58 +1,40 @@
 
-% Table created by stargazer v.5.2.3 by Marek Hlavac, Social Policy Institute. E-mail: marek.hlavac at gmail.com
-% Date and time: Wed, Jul 02, 2025 - 17:51:03
-\begin{table}[!htbp] \centering 
-  \caption{OLS Results for Unemployment Duration} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}}lcc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{2}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-3} 
-\\[-1.8ex] & \multicolumn{2}{c}{Unemployment Duration (days)} \\ 
-\\[-1.8ex] & (1) & (2)\\ 
-\hline \\[-1.8ex] 
- Treated & 78.798$^{***}$ & 40.963$^{***}$ \\ 
-  & ($-$2.963) & (19.965) \\ 
-  & & \\ 
- Post & 27.363$^{***}$ & 21.677$^{***}$ \\ 
-  & ($-$0.290) & (0.566) \\ 
-  & & \\ 
- Treated * Post &  & 1.528$^{***}$ \\ 
-  &  & ($-$1.429) \\ 
-  & & \\ 
- sex &  & 5.419$^{*}$ \\ 
-  &  & ($-$10.826) \\ 
-  & & \\ 
- marits &  & 15.070$^{***}$ \\ 
-  &  & ($-$0.012) \\ 
-  & & \\ 
- insured\_earn &  & 0.001 \\ 
-  &  & (0.001) \\ 
-  & & \\ 
- lastj\_rate &  & $-$0.162$^{*}$ \\ 
-  &  & ($-$0.939) \\ 
-  & & \\ 
- child\_subsidies &  & 22.562$^{***}$ \\ 
-  &  & ($-$1.286) \\ 
-  & & \\ 
- contr\_2y &  & 1.573$^{***}$ \\ 
-  &  & ($-$0.544) \\ 
-  & & \\ 
- treat\_group:post & $-$28.033$^{***}$ & $-$28.263$^{***}$ \\ 
-  & (0.290) & (1.683) \\ 
-  & & \\ 
- Constant & 164.055$^{***}$ & 106.955$^{***}$ \\ 
-  & (2.963) & (135.690) \\ 
-  & & \\ 
-\hline \\[-1.8ex] 
-Observations & 23962 &  \\ 
-R-squared & 0.038 &  \\ 
-Observations & 23,855 & 23,855 \\ 
-R$^{2}$ & 0.038 & 0.054 \\ 
-Adjusted R$^{2}$ & 0.038 & 0.054 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
-\end{tabular} 
-\end{table} 
+\begin{table}
+\begin{center}
+\begin{tabular}{l D{.}{.}{5.5} D{.}{.}{5.5}}
+\toprule
+ & \multicolumn{1}{c}{No Covariates} & \multicolumn{1}{c}{With Covariates} \\
+\midrule
+(Intercept)      & 164.06^{***} & 106.95^{***} \\
+                 & (1.72)       & (11.65)      \\
+Treated          & 78.80^{***}  & 40.96^{***}  \\
+                 & (3.72)       & (5.68)       \\
+Post             & 27.36^{***}  & 21.68^{***}  \\
+                 & (0.72)       & (1.19)       \\
+Treated * Post   & -28.03^{***} & -28.26^{***} \\
+                 & (1.54)       & (1.54)       \\
+Age              &              & 1.53^{***}   \\
+                 &              & (0.24)       \\
+Sex              &              & 5.42^{*}     \\
+                 &              & (3.09)       \\
+Marital Status   &              & 15.07^{***}  \\
+                 &              & (3.52)       \\
+Insured Earnings &              & 0.00         \\
+                 &              & (0.00)       \\
+Last Job Rate    &              & -0.16^{*}    \\
+                 &              & (0.10)       \\
+Child Subsidies  &              & 22.56^{***}  \\
+                 &              & (5.16)       \\
+Contributions 2y &              & 1.57^{***}   \\
+                 &              & (0.20)       \\
+\midrule
+R$^2$            & 0.04         & 0.05         \\
+Adj. R$^2$       & 0.04         & 0.05         \\
+Num. obs.        & 23855        & 23855        \\
+\bottomrule
+\multicolumn{3}{l}{\scriptsize{$^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$}}
+\end{tabular}
+\caption{OLS Results for Unemployment Duration}
+\label{tab:final_ols_results}
+\end{center}
+\end{table}

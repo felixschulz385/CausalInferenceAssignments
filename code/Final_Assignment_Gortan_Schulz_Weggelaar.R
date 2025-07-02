@@ -552,21 +552,19 @@ ols_covariates_p <- 2 * pt(-abs(ols_covariates_t), df = df.residual(ols_covariat
 
 
 # Output the results
-stargazer(
+texreg(
   list(ols_results, ols_covariates_results),
-  se = list(ols_vcov_clustered, ols_covariates_vcov_clustered),
-  t = list(ols_t, ols_covariates_t),
-  p = list(ols_p, ols_covariates_p),
-  type = "latex",
-  out = "output/tables/final_ols_results.tex",
-  title = "OLS Results for Unemployment Duration",
-  dep.var.labels = "Unemployment Duration (days)",
-  covariate.labels = c("Treated", "Post", "Treated * Post"),
-  omit.stat = c("f", "ser"),
-  add.lines = list(
-    c("Observations", nrow(data)),
-    c("R-squared", round(summary(ols_results)$r.squared, 3))
-  )
+  custom.model.names = c("No Covariates", "With Covariates"),
+  custom.coef.names = c("(Intercept)", "Treated", "Post", "Treated * Post", "Age", "Sex", "Marital Status", "Insured Earnings", "Last Job Rate", "Child Subsidies", "Contributions 2y"),
+  stars = c(0.01, 0.05, 0.1),
+  caption = "OLS Results for Unemployment Duration",
+  label = "tab:final_ols_results",
+  file = "output/tables/final_ols_results.tex",
+  dcolumn = TRUE,
+  booktabs = TRUE,
+  use.packages = FALSE,
+  override.se = list(ols_se, ols_covariates_se),
+  override.pvalues = list(ols_p, ols_covariates_p)
 )
 
 # ----------
