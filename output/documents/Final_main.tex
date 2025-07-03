@@ -168,12 +168,21 @@ Figure \ref{fig:combined_overtime} shows the evolution of the outcome variables 
 
     \item \textbf{No anticipation assumption (NA)}. According to the text, `\textit{Prior discussions about this policy change have remained confidential, so that neither caseworkers nor the unemployed had knowledge about it before this date}. If that is true, then this assumption is respected. \
 
-    \item \textbf{Common trend assumption (CT).} Sadly, we do not have a panel structure present in the data, not allowing us to compute an event study to observe pre-treatment trends. Figure~\ref{fig:age_hist} shows that takeup of treatment is near universal in the treatment group. We therefore believe that self-selection into treatment is minimal. While we believe re-entry into the labor market is likely harder the older an individual is, there is no reason to believe this has changed around the program introduction. Therefore we believe that we have a good case for the CT assumption to hold.\ 
+    \item \textbf{Common trend assumption (CT).} Ideally we would like to present a an event study to investigate pre-trends. That design needs outcomes observed reliably at several points before and after the moment treatment begins for every treated unit, so that one can plot and test the lead-lags (pre-trend) coefficients. We only have data for two calendar years (2010 and 2015). In order to construct a multi-period outcome panel, we need to make the assumption that we know of every unemployment spell. This allows us to estimate an event study on the month and individual level. We present the results in Figure~\ref{fig:event_study}
+    
+    In addition to this evidence, figure~\ref{fig:age_hist} shows that takeup of treatment is near universal in the treatment group. We therefore believe that self-selection into treatment is minimal. While we believe re-entry into the labor market is likely harder the older an individual is, there is no reason to believe this has changed around the program introduction. Therefore we believe that we have a good case for the CT assumption to hold.\ 
 
     \item \textbf{Exogeneity assumption (EX)}. :\ 
 
     \item \textbf{Common support (CS)}. Treated and non-treated mainly differ in age. Therefore, people below 45 are for sure part of the non-treated cohort. Similarly, people older than 45 are very likely to be part of the treated (see Figure \ref{fig:age_hist}).
 \end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{output/figures/final_event_study_employment_rate.jpg}
+    \caption{Training program and employment: Event Study.}
+    \label{fig:event_study}
+\end{figure}
 
 \begin{figure}
     \centering
@@ -202,14 +211,16 @@ We estimate the model using Ordinary Least Squares (OLS). We believe that, for t
 % [10 points]
 Problem of normal parametric diff-in-diff is that if (i) individual characteristics are associated with the outcome variable and (ii) characteristics are imbalanced over the groups, then it's likely that common trend assumption does not hold [this is some info I found on the PDF I uploaded in the GitHub]. Therefore, reweighting...
 
+\input{output/tables/final_atet_results}
+
 \paragraph*{9.}
 % Discuss different ways of exploiting the panel structure of the data and implement one of them.
 % Discuss to which extent the panel approach relaxes assumptions underlying the estimation
 % approaches you used before. Describe in detail what you do and why. Discuss the results and
 % compare them the other estimates. [10 points]
 
-% Maybe do something staggered? 
-
+% Marco: Maybe do something staggered? 
+% Felix: We could lean further in the event study I added for question 6 or introduce individidual FEs.
 
 \paragraph*{10.}
 % Check for heterogeneous program effects with respect to observed characteristics for which
