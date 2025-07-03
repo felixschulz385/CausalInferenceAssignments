@@ -1,0 +1,28 @@
+
+\begin{table}
+\begin{center}
+\begin{tabular}{l D{.}{.}{5.5} D{.}{.}{5.5} D{.}{.}{5.5} D{.}{.}{5.5}}
+\toprule
+ & \multicolumn{2}{c}{Unemployment Duration} & \multicolumn{2}{c}{Employment After 12 Months} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & \multicolumn{1}{c}{(1a)} & \multicolumn{1}{c}{(1b)} & \multicolumn{1}{c}{(2a)} & \multicolumn{1}{c}{(2b)} \\
+\midrule
+(Intercept)    & 164.06^{***} & 106.95^{***} & 0.89^{***}  & 1.05^{***}  \\
+               & (1.72)       & (11.65)      & (0.00)      & (0.02)      \\
+Treated        & 78.80^{***}  & 40.96^{***}  & -0.13^{***} & -0.04^{***} \\
+               & (3.72)       & (5.68)       & (0.01)      & (0.01)      \\
+Post           & 27.36^{***}  & 21.68^{***}  & -0.02^{***} & -0.01^{*}   \\
+               & (0.72)       & (1.19)       & (0.00)      & (0.00)      \\
+Treated * Post & -28.03^{***} & -28.26^{***} & 0.07^{***}  & 0.07^{***}  \\
+               & (1.54)       & (1.54)       & (0.00)      & (0.00)      \\
+\midrule
+R$^2$          & 0.04         & 0.05         & 0.02        & 0.04        \\
+Adj. R$^2$     & 0.04         & 0.05         & 0.02        & 0.04        \\
+Num. obs.      & 23855        & 23855        & 23855       & 23855       \\
+\bottomrule
+\multicolumn{5}{l}{\scriptsize{Covariates include age, gender, marital status, earning insured by unemployment insurance, activity rate in the last job, receiving child subsidies, months of employment in the 2 years prior to unemployment. Standard errors clustered at the individual level. $^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$}}
+\end{tabular}
+\caption{OLS Results for Unemployment Duration and Employment After 12 Months}
+\label{tab:final_ols_results_combined}
+\end{center}
+\end{table}

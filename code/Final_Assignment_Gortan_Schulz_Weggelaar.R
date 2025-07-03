@@ -471,6 +471,7 @@ ggsave("output/figures/final_histogram_age.jpg", plot = hist_age, width = 8.5, h
 # Implement the DiD using OLS. Describe in detail what you do and why. Discuss whether or
 # not you need additional control variables and if so, why. Discuss the results. [8 points]
 
+# OLS DiD for unemployment duration
 ols_results <- lm(unempl_duration ~ treat_group * post, data)
 ols_vcov_clustered <- vcovCL(ols_results, cluster = ~ id)
 ols_se <- sqrt(diag(ols_vcov_clustered))
@@ -488,22 +489,52 @@ ols_covariates_se <- sqrt(diag(ols_covariates_vcov_clustered))
 ols_covariates_t <- coef(ols_covariates_results) / ols_covariates_se
 ols_covariates_p <- 2 * pt(-abs(ols_covariates_t), df = df.residual(ols_covariates_results))
 
+# OLS DiD for employment after 12 months
+ols_results_emp <- lm(employed_after_12_months ~ treat_group * post, data)
+ols_vcov_clustered_emp <- vcovCL(ols_results_emp, cluster = ~ id)
+ols_se_emp <- sqrt(diag(ols_vcov_clustered_emp))
+ols_t_emp <- coef(ols_results_emp) / ols_se_emp
+ols_p_emp <- 2 * pt(-abs(ols_t_emp), df = df.residual(ols_results_emp))
 
-# Output the results
+ols_covariates_results_emp <- lm(
+  employed_after_12_months ~ treat_group * post + 
+    age + sex + marits + insured_earn + lastj_rate +
+    child_subsidies + contr_2y,
+  data = data
+)
+ols_covariates_vcov_clustered_emp <- vcovCL(ols_covariates_results_emp, cluster = ~ id)
+ols_covariates_se_emp <- sqrt(diag(ols_covariates_vcov_clustered_emp))
+ols_covariates_t_emp <- coef(ols_covariates_results_emp) / ols_covariates_se_emp
+ols_covariates_p_emp <- 2 * pt(-abs(ols_covariates_t_emp), df = df.residual(ols_covariates_results_emp))
+
+
+# Output the results for both outcomes in one table
 texreg(
-  list(ols_results, ols_covariates_results),
-  custom.model.names = c("No Covariates", "With Covariates"),
-  custom.coef.names = c("(Intercept)", "Treated", "Post", "Treated * Post", "Age", "Sex", "Marital Status", "Insured Earnings", "Last Job Rate", "Child Subsidies", "Contributions 2y"),
+  list(
+    ols_results, ols_covariates_results,
+    ols_results_emp, ols_covariates_results_emp
+  ),
+  custom.header = list(
+    "Unemployment Duration" = 1:2,
+    "Employment After 12 Months" = 3:4
+  ),
+  custom.model.names = c(
+    "(1a)", "(1b)", "(2a)", "(2b)"
+  ),
+  custom.coef.names = c(
+    "(Intercept)", "Treated", "Post", "Treated * Post", "Age", "Sex", "Marital Status", 
+    "Insured Earnings", "Last Job Rate", "Child Subsidies", "Contributions 2y"
+  ),
   omit.coef = "(age)|(sex)|(marits)|(insured_earn)|(lastj_rate)|(child_subsidies)|(contr_2y)",
   stars = c(0.01, 0.05, 0.1),
-  caption = "OLS Results for Unemployment Duration",
-  label = "tab:final_ols_results",
-  file = "output/tables/final_ols_results.tex",
+  caption = "OLS Results for Unemployment Duration and Employment After 12 Months",
+  label = "tab:final_ols_results_combined",
+  file = "output/tables/final_ols_results_combined.tex",
   dcolumn = TRUE,
   booktabs = TRUE,
   use.packages = FALSE,
-  override.se = list(ols_se, ols_covariates_se),
-  override.pvalues = list(ols_p, ols_covariates_p),
+  override.se = list(ols_se, ols_covariates_se, ols_se_emp, ols_covariates_se_emp),
+  override.pvalues = list(ols_p, ols_covariates_p, ols_p_emp, ols_covariates_p_emp),
   custom.note = "Covariates include age, gender, marital status, earning insured by unemployment insurance, activity rate in the last job, receiving child subsidies, months of employment in the 2 years prior to unemployment. Standard errors clustered at the individual level. $^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$",
 )
 
