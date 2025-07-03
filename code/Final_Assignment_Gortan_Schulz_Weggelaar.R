@@ -391,6 +391,53 @@ ggsave("output/figures/final_unemployment_duration_over_time.jpg", plot = p2, wi
 # Discuss the validity of the identifying assumptions in this specific case. Provide and discuss
 # supporting evidence if possible, incl. event study estimates. [8 points]
 
+# Parallel trends assumption
+# ----------
+
+data_post <- data %>%
+  filter(post == 1) %>%
+  mutate(
+    tmonth_start = date_start %>% `day<-`(1),
+    tmonth_end   = date_end %>% `day<-`(1),
+    mtime_start = ceiling((ymd(min(date_start, na.rm = T)) %--% tmonth_start) / dmonths(1)) + 1,
+    mtime_end = ceiling((ymd(min(date_start, na.rm = T)) %--% tmonth_end) / dmonths(1)) + 1
+  ) %>%
+  select(id, mtime_start, mtime_end, treat) %>%
+  drop_na()
+
+create_subpanel <- function(id, mtime_start, mtime_end, treat) {
+  tibble(
+    id              = id,
+    mtime           = seq(mtime_start, 24, 1),
+    gtime           = ifelse(treat > 1, mtime_start + (treat - 1), 0),
+    employed        = ifelse(((mtime >= mtime_start) & (mtime < mtime_end)), 0, 1),
+  )
+}
+
+event_study_panel <- purrr::pmap_df(data_post, create_subpanel)
+
+library(did)
+
+att_gt(
+  yname     = "employed",
+  tname     = "mtime",
+  gname     = "gtime",
+  idname    = "id",
+  data      = event_study_panel,
+  control_group = "nevertreated"
+) -> est
+
+aggte(est, type = "dynamic", na.rm = T) -> es
+
+ggdid(
+  es,
+  xlab = "Months since treatment",
+  ylab = "Employment rate",
+  title = "Event Study: Employment Rate by Months since Treatment",
+  theme = theme_minimal(base_size = 14)
+)
+ggsave("output/figures/final_event_study_employment_rate.jpg", width = 6.5, height = 5)
+
 # Common support
 #----------
 # Hist plot of age by the two groups in post == 1
@@ -556,6 +603,7 @@ texreg(
   list(ols_results, ols_covariates_results),
   custom.model.names = c("No Covariates", "With Covariates"),
   custom.coef.names = c("(Intercept)", "Treated", "Post", "Treated * Post", "Age", "Sex", "Marital Status", "Insured Earnings", "Last Job Rate", "Child Subsidies", "Contributions 2y"),
+  omit.coef = "(age)|(sex)|(marits)|(insured_earn)|(lastj_rate)|(child_subsidies)|(contr_2y)",
   stars = c(0.01, 0.05, 0.1),
   caption = "OLS Results for Unemployment Duration",
   label = "tab:final_ols_results",
@@ -564,7 +612,8 @@ texreg(
   booktabs = TRUE,
   use.packages = FALSE,
   override.se = list(ols_se, ols_covariates_se),
-  override.pvalues = list(ols_p, ols_covariates_p)
+  override.pvalues = list(ols_p, ols_covariates_p),
+  custom.note = "Covariates include age, gender, marital status, earning insured by unemployment insurance, activity rate in the last job, receiving child subsidies, months of employment in the 2 years prior to unemployment. Standard errors clustered at the individual level. $^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$",
 )
 
 # ----------
@@ -575,3 +624,155 @@ texreg(
 # Implement the DiD using a semi-parametric estimator based on the propensity score. Describe
 # in detail what you do and why. Discuss the results and compare them to the OLS estimates.
 # [10 points]
+
+# Implementation of the propensity score-based DiD estimator from slides
+# We need to estimate three separate propensity score models for the three comparisons:
+# 1. P(T=1, D=1 | T=1, D=1 vs T=1, D=0) - treated post vs treated pre
+# 2. P(T=1, D=1 | T=1, D=1 vs T=0, D=1) - treated post vs controls post  
+# 3. P(T=1, D=1 | T=1, D=1 vs T=0, D=0) - treated post vs controls pre
+
+# Prepare data subsets for each comparison
+data_clean <- data %>% filter(!is.na(unempl_duration) & !is.na(employed_after_12_months))
+
+# Model 1: Treated post vs treated pre
+data_comp1 <- data_clean %>% filter(treat_group == 1)
+data_comp1$outcome_indicator <- ifelse(data_comp1$post == 1, 1, 0)
+
+ps_model1 <- glm(
+  outcome_indicator ~ age + sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y,
+  data = data_comp1,
+  family = binomial(link = "logit")
+)
+data_comp1$ps1 <- predict(ps_model1, type = "response")
+
+# Model 2: Treated post vs controls post
+data_comp2 <- data_clean %>% filter(post == 1)
+data_comp2$outcome_indicator <- ifelse(data_comp2$treat_group == 1, 1, 0)
+
+ps_model2 <- glm(
+  outcome_indicator ~ age + sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y,
+  data = data_comp2,
+  family = binomial(link = "logit")
+)
+data_comp2$ps2 <- predict(ps_model2, type = "response")
+
+# Model 3: Treated post vs controls pre
+data_comp3 <- data_clean %>% filter((treat_group == 1 & post == 1) | (treat_group == 0 & post == 0))
+data_comp3$outcome_indicator <- ifelse(data_comp3$treat_group == 1 & data_comp3$post == 1, 1, 0)
+
+ps_model3 <- glm(
+  outcome_indicator ~ age + sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y,
+  data = data_comp3,
+  family = binomial(link = "logit")
+)
+data_comp3$ps3 <- predict(ps_model3, type = "response")
+
+# Function to calculate ATET using the slide formula
+calculate_atet <- function(outcome_var) {
+  
+  # Extract relevant data
+  treated_post <- data_clean %>% filter(treat_group == 1, post == 1)
+  treated_pre <- data_clean %>% filter(treat_group == 1, post == 0)
+  control_post <- data_clean %>% filter(treat_group == 0, post == 1)
+  control_pre <- data_clean %>% filter(treat_group == 0, post == 0)
+  
+  # Merge propensity scores
+  treated_pre <- treated_pre %>%
+    left_join(data_comp1 %>% select(id, date_start, ps1), by = c("id", "date_start"))
+  control_post <- control_post %>%
+    left_join(data_comp2 %>% select(id, date_start, ps2), by = c("id", "date_start"))
+  control_pre <- control_pre %>%
+    left_join(data_comp3 %>% select(id, date_start, ps3), by = c("id", "date_start"))
+  
+  # Calculate weights w_{0,1}, w_{1,0}, w_{0,0} as shown in slides
+  treated_pre$w01 <- (1 - treated_pre$ps1) / treated_pre$ps1
+  control_post$w10 <- (1 - control_post$ps2) / control_post$ps2
+  control_pre$w00 <- (1 - control_pre$ps3) / control_pre$ps3
+  
+  # Calculate weighted averages for each component
+  # Term 1: E[Y | T=1, D=1]
+  term1 <- mean(treated_post[[outcome_var]], na.rm = TRUE)
+  
+  # Term 2: E[Y(0,1) | T=1] = weighted average of treated pre
+  if(sum(!is.na(treated_pre$w01)) > 0) {
+    term2_num <- sum(treated_pre$w01 * treated_pre[[outcome_var]], na.rm = TRUE)
+    term2_den <- sum(treated_pre$w01, na.rm = TRUE)
+    term2 <- term2_num / term2_den
+  } else {
+    term2 <- mean(treated_pre[[outcome_var]], na.rm = TRUE)
+  }
+  
+  # Term 3: E[Y(1,0) | T=1] = weighted average of controls post
+  if(sum(!is.na(control_post$w10)) > 0) {
+    term3_num <- sum(control_post$w10 * control_post[[outcome_var]], na.rm = TRUE)
+    term3_den <- sum(control_post$w10, na.rm = TRUE)
+    term3 <- term3_num / term3_den
+  } else {
+    term3 <- mean(control_post[[outcome_var]], na.rm = TRUE)
+  }
+  
+  # Term 4: E[Y(0,0) | T=1] = weighted average of controls pre
+  if(sum(!is.na(control_pre$w00)) > 0) {
+    term4_num <- sum(control_pre$w00 * control_pre[[outcome_var]], na.rm = TRUE)
+    term4_den <- sum(control_pre$w00, na.rm = TRUE)
+    term4 <- term4_num / term4_den
+  } else {
+    term4 <- mean(control_pre[[outcome_var]], na.rm = TRUE)
+  }
+  
+  # Calculate ATET = term1 - term2 - term3 + term4
+  atet <- term1 - term2 - term3 + term4
+  
+  return(list(
+    atet = atet,
+    term1 = term1,
+    term2 = term2, 
+    term3 = term3,
+    term4 = term4
+  ))
+}
+
+# Calculate ATET for both outcomes
+atet_duration <- calculate_atet("unempl_duration")
+atet_employment <- calculate_atet("employed_after_12_months")
+
+# Create a summary table for ATET results
+comparison_results <- data.frame(
+  Outcome = c("Unemployment Duration", "Employment after 12 months"),
+  ATET = c(round(atet_duration$atet, 2), round(atet_employment$atet, 4)),
+  `E[Y|T=1,D=1]` = c(round(atet_duration$term1, 2), round(atet_employment$term1, 4)),
+  `E[Y(0,1)|T=1]` = c(round(atet_duration$term2, 2), round(atet_employment$term2, 4)),
+  `E[Y(1,0)|T=1]` = c(round(atet_duration$term3, 2), round(atet_employment$term3, 4)),
+  `E[Y(0,0)|T=1]` = c(round(atet_duration$term4, 2), round(atet_employment$term4, 4))
+)
+
+# Print as a nice table
+kableExtra::kbl(
+  comparison_results,
+  format = "latex",
+  col.names = c("Outcome", "ATET", "E[Y|T=1,D=1]", "E[Y(0,1)|T=1]", "E[Y(1,0)|T=1]", "E[Y(0,0)|T=1]"),
+  digits = 2,
+  caption = "ATET Results using Propensity Score Method from Slides",
+  booktabs = TRUE,
+  align = "lcccccc"
+) %>%
+  writeLines("output/tables/final_atet_results.tex")
+
+
+
+data %>% nrow()
+
+data %>% group_by(id) %>% summarise(n = n()) %>% pull(n) %>% table()
+
+data %>% group_by(id) %>% summarise(pre = mean(date_start < as.Date("2013-01-01"))) %>% pull(pre) %>% table()
+
+
+data %>% select(date_start) %>% 
+  mutate(year = year(date_start)) %>%
+  group_by(year) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(x = year, y = n)) +
+  geom_col() +
+  labs(title = "Number of Unemployment Spells by Year", x = "Year", y = "Count") +
+  theme_minimal(base_size = 14)
+

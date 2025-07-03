@@ -5,34 +5,20 @@
 \toprule
  & \multicolumn{1}{c}{No Covariates} & \multicolumn{1}{c}{With Covariates} \\
 \midrule
-(Intercept)      & 164.06^{***} & 106.95^{***} \\
-                 & (1.72)       & (11.65)      \\
-Treated          & 78.80^{***}  & 40.96^{***}  \\
-                 & (3.72)       & (5.68)       \\
-Post             & 27.36^{***}  & 21.68^{***}  \\
-                 & (0.72)       & (1.19)       \\
-Treated * Post   & -28.03^{***} & -28.26^{***} \\
-                 & (1.54)       & (1.54)       \\
-Age              &              & 1.53^{***}   \\
-                 &              & (0.24)       \\
-Sex              &              & 5.42^{*}     \\
-                 &              & (3.09)       \\
-Marital Status   &              & 15.07^{***}  \\
-                 &              & (3.52)       \\
-Insured Earnings &              & 0.00         \\
-                 &              & (0.00)       \\
-Last Job Rate    &              & -0.16^{*}    \\
-                 &              & (0.10)       \\
-Child Subsidies  &              & 22.56^{***}  \\
-                 &              & (5.16)       \\
-Contributions 2y &              & 1.57^{***}   \\
-                 &              & (0.20)       \\
+(Intercept)    & 164.06^{***} & 106.95^{***} \\
+               & (1.72)       & (11.65)      \\
+Treated        & 78.80^{***}  & 40.96^{***}  \\
+               & (3.72)       & (5.68)       \\
+Post           & 27.36^{***}  & 21.68^{***}  \\
+               & (0.72)       & (1.19)       \\
+Treated * Post & -28.03^{***} & -28.26^{***} \\
+               & (1.54)       & (1.54)       \\
 \midrule
-R$^2$            & 0.04         & 0.05         \\
-Adj. R$^2$       & 0.04         & 0.05         \\
-Num. obs.        & 23855        & 23855        \\
+R$^2$          & 0.04         & 0.05         \\
+Adj. R$^2$     & 0.04         & 0.05         \\
+Num. obs.      & 23855        & 23855        \\
 \bottomrule
-\multicolumn{3}{l}{\scriptsize{$^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$}}
+\multicolumn{3}{l}{\scriptsize{Covariates include age, gender, marital status, earning insured by unemployment insurance, activity rate in the last job, receiving child subsidies, months of employment in the 2 years prior to unemployment. Standard errors clustered at the individual level. $^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$}}
 \end{tabular}
 \caption{OLS Results for Unemployment Duration}
 \label{tab:final_ols_results}
