@@ -9,7 +9,7 @@
 Sys.setlocale("LC_TIME", "C")  
 packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "broom", "broom.mixed", 
                      "jtools", "texreg", "kableExtra", "rstudioapi", "lubridate", "ggplot2", 
-                     "knitr", "kableExtra", "scales", "tidyr", "causalweight")
+                     "knitr", "kableExtra", "scales", "tidyr", "causalweight", "ggpubr")
 # Load necessary libraries
 lapply(packages.vector, require, character.only = TRUE)
 # Load the data
@@ -448,11 +448,11 @@ data <- data %>%
                    labels = c("Control","Treated"))
   )
 
-hist_age = ggplot(data %>% filter(post == 1), aes(x = age, fill = Group)) +
+hist_age = ggplot(data %>% filter(post == 1), aes(x = age + 1, fill = Group)) +
   geom_histogram(
     position = "stack",  # overlay
     alpha    = 0.4,         # see through
-    bins     = 30           # or choose binwidth = 1
+    bins     = 30,           # or choose binwidth = 1
   ) +
   scale_fill_brewer(palette = "Set1") +
   labs(
@@ -680,7 +680,35 @@ kableExtra::kbl(
 ) %>%
   writeLines("output/tables/final_atet_results.tex")
 
+# 1 x 3 plot with relation between age and pscore taken from data_comp1, data_comp2,
+# data_comp3
+ggps1 = ggplot(data_comp1, aes(x = age, y = ps1)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Propensity Score for Treated Post vs Treated Pre",
+       x = "Age", y = "Propensity Score") +
+  theme_minimal(base_size = 14)
 
+ggps2 = ggplot(data_comp2, aes(x = age, y = ps2)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Propensity Score for Treated Post vs Controls Post",
+       x = "Age", y = "Propensity Score") +
+  theme_minimal(base_size = 14)
+
+ggps3 = ggplot(data_comp3, aes(x = age, y = ps3)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Propensity Score for Treated Post vs Controls Pre",
+       x = "Age", y = "Propensity Score") +
+  theme_minimal(base_size = 14)
+
+# Combine the three plots into one
+ggarrange(
+  ggps1, ggps2, ggps3,
+  ncol = 3, nrow = 1,
+  labels = c("A", "B", "C"),
+  common.legend = TRUE, legend = "bottom"
+) +
+  labs(title = "Propensity Scores by Age for Different Comparisons") +
+  theme_minimal(base_size = 14)
 
 data %>% nrow()
 
