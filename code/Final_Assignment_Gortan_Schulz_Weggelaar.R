@@ -133,13 +133,13 @@ bin_summary <- dataplot %>%
 # 1b) bar chart with CIs
 plot_employed12m <- ggplot(bin_summary, aes(x = Treat, y = prop, fill = Period)) +
   geom_col(position = position_dodge(width = 0.7), width = 0.6) +
-  geom_errorbar(aes(
-    ymin = pmax(0, prop - 1.96 * se),
-    ymax = pmin(1, prop + 1.96 * se)
-  ),
-  position = position_dodge(width = 0.7),
-  width = 0.2
-  ) +
+  # geom_errorbar(aes(
+  #   ymin = pmax(0, prop - 1.96 * se),
+  #   ymax = pmin(1, prop + 1.96 * se)
+  # ),
+  # position = position_dodge(width = 0.7),
+  # width = 0.2
+  # ) +
   scale_y_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0,0.05))) +
   scale_fill_brewer(palette = "Set2") +
   labs(
@@ -157,9 +157,87 @@ plot_employed12m <- ggplot(bin_summary, aes(x = Treat, y = prop, fill = Period))
 # Save the plot
 ggsave("output/figures/final_employment12m.jpg", plot = plot_employed12m, width = 6.5, height = 5)
 
+# Descriptive statistics
+
+descr_stat = data %>% dplyr::select(treat_group, post, unempl_duration, employed_after_12_months)
 
 
 
+
+## -------------------------------------------------------------------
+##  1. Put the data in 'long' form and define the four DiD groups
+## -------------------------------------------------------------------
+did_long <- descr_stat %>% 
+  mutate(group = factor(
+    case_when(
+      treat_group == 0 & post == 0 ~ "Control (pre)",
+      treat_group == 0 & post == 1 ~ "Control (post)",
+      treat_group == 1 & post == 0 ~ "Treatment (pre)",
+      treat_group == 1 & post == 1 ~ "Treatment (post)"
+    ),
+    levels = c("Control (pre)", "Control (post)",
+               "Treatment (pre)", "Treatment (post)")
+  )) %>% 
+  pivot_longer(cols = c(unempl_duration, employed_after_12_months),
+               names_to  = "variable",
+               values_to = "value")
+
+## -------------------------------------------------------------------
+##  2. Descriptive statistics
+## -------------------------------------------------------------------
+descr_tbl <- did_long %>% 
+  group_by(variable, group) %>% 
+  summarise(
+    mean   = mean(value, na.rm = TRUE),
+    sd     = sd(value,  na.rm = TRUE),
+    p25    = quantile(value, 0.25, na.rm = TRUE),
+    median = median(value, na.rm = TRUE),
+    p75    = quantile(value, 0.75, na.rm = TRUE),
+    n      = n(),
+    .groups = "drop"
+  ) %>% 
+  
+  ## reshape so each line = one statistic for one variable --------------
+pivot_longer(cols = mean:n,
+             names_to  = "stat",
+             values_to = "estimate") %>% 
+  pivot_wider(names_from = group, values_from = estimate) %>% 
+  
+  ## nicer variable labels ----------------------------------------------
+mutate(
+  variable = factor(variable,
+                    levels  = c("unempl_duration",
+                                "employed_after_12_months"),
+                    labels  = c("Unemployment duration (days)",
+                                "Employed after 12 months (share)")),
+  stat = factor(stat, levels = c("mean","sd","median","p25","p75", "n"))
+) %>% 
+  arrange(variable, stat) %>% 
+  
+  ## format numbers: 1 decimal for days, 3 for proportions --------------
+mutate(across(`Control (pre)`:`Treatment (post)`,
+              ~ ifelse(variable == "Unemployment duration (days)" & stat != "n",
+                       formatC(.x, format = "f", digits = 1),
+                       ifelse(stat == "n",
+                              formatC(.x, format = "d"),
+                              formatC(.x, format = "f", digits = 3))))) 
+
+## -------------------------------------------------------------------
+##  3. LaTeX output (stored invisibly in descr_tbl)
+## -------------------------------------------------------------------
+descr_tbl_tex = descr_tbl %>% 
+  kable(format   = "latex",
+        booktabs = TRUE,
+        caption  = "Descriptive statistics by treatment status and period",
+        col.names = c("Variable", "Statistic",
+                      "Control (pre)", "Control (post)",
+                      "Treatment (pre)", "Treatment (post)")) %>% 
+  kable_styling(latex_options = c("HOLD_position", "scale_down")) %>% 
+  add_header_above(c("", "", "Control" = 2, "Treatment" = 2)) %>% 
+  collapse_rows(columns = 1, latex_hline = "major")
+
+# Write to file
+writeLines(descr_tbl_tex, "output/tables/final_descr_stat.tex")
 # ----------
 # Question 3
 # ----------
