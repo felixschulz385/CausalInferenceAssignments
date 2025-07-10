@@ -229,10 +229,12 @@ descr_tbl_tex = descr_tbl %>%
   kable(format   = "latex",
         booktabs = TRUE,
         caption  = "Descriptive statistics by treatment status and period",
+        label    = "descr_stat",
+        position = "h!",
         col.names = c("Variable", "Statistic",
                       "Control (pre)", "Control (post)",
                       "Treatment (pre)", "Treatment (post)")) %>% 
-  kable_styling(latex_options = c("HOLD_position", "scale_down")) %>% 
+  kable_styling(latex_options = c("scale_down")) %>% 
   add_header_above(c("", "", "Control" = 2, "Treatment" = 2)) %>% 
   collapse_rows(columns = 1, latex_hline = "major")
 
@@ -246,11 +248,15 @@ writeLines(descr_tbl_tex, "output/tables/final_descr_stat.tex")
 # ----------
 
 
-# Codify sex, marital status, variable
+# Codify sex, marital status, education variable
 data$sex <- ifelse(data$sex == "Female", 1,
                      ifelse(data$sex == "Male", 0, NA))
 data$marits <- ifelse(data$marits == "Married", 1,
                    ifelse(data$marits == "Unmarried", 0, NA))
+data$educ <- ifelse(data$educ == "Specialized" | data$educ == "University", 2,
+                   ifelse(data$educ == "Apprenticeship or matura", 1,
+                          ifelse(data$educ == "School", 0, NA)))
+
 # Descriptive statistics for the four groups
 descriptive_stats <- data %>%
   group_by(treat_group, post) %>%
@@ -263,6 +269,7 @@ descriptive_stats <- data %>%
     mean_rate     = mean(lastj_rate, na.rm = TRUE),
     mean_childs   = mean(child_subsidies, na.rm = TRUE),
     mean_contr_2y = mean(contr_2y, na.rm = TRUE),
+    mean_educ     = mean(educ, na.rm = T),
     .groups = 'drop'
   )
 
@@ -274,13 +281,14 @@ descriptive_tbl <- descriptive_stats %>%
     mean_age           = mean_age,               # years
     mean_earn          = mean_earn,              # currency
     mean_rate          = mean_rate,              # %
-    mean_contr_2y      = mean_contr_2y           # months
+    mean_contr_2y      = mean_contr_2y,           # months
+    mean_educ          = mean_educ
   ) %>%
   # round to one decimal place
   mutate(across(starts_with("mean_"), ~round(.x, 1))) %>%
   # rename for nicer column headers
   rename(
-    Treatment            = treat_group,
+    `Treat.`            = treat_group,
     `Post`    = post,
     N                = n,
     `Age (yrs)`      = mean_age,
@@ -289,7 +297,8 @@ descriptive_tbl <- descriptive_stats %>%
     `Earnings`       = mean_earn,
     `Act. rate (%)`  = mean_rate,
     `Child sub. (%)` = mean_childs,
-    `Contr. 2y (m)`  = mean_contr_2y
+    `Contr. 2y (m)`  = mean_contr_2y,
+    `Educ.`      = mean_educ
   )
 
 # 2) Print to LaTeX with group headers
@@ -299,13 +308,13 @@ desc_stat = descriptive_tbl %>%
     booktabs = TRUE,
     linesep = "",
     caption = "Mean observed characheristics by Treatment Group and Period",
-    label   = "tab:final_mean_char",
+    label   = "final_mean_char",
   ) %>%
   add_header_above(c(
     " " = 2,
     "Demographics" = 3,
     "Economic"     = 2,
-    "Other"        = 3
+    "Other"        = 4
   )) %>%
   kable_styling(latex_options = c("hold_position", "scale_down"))
 
