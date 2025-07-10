@@ -10,7 +10,7 @@ Sys.setlocale("LC_TIME", "C")
 packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "broom", "broom.mixed", 
                      "jtools", "texreg", "kableExtra", "rstudioapi", "lubridate", "ggplot2", 
                      "knitr", "kableExtra", "scales", "tidyr", "causalweight", "did", "purrr", 
-                     "lubridate")
+                     "lubridate", "ggpubr")
 # Load necessary libraries
 lapply(packages.vector, require, character.only = TRUE)
 # Load the data
@@ -134,13 +134,13 @@ bin_summary <- dataplot %>%
 # 1b) bar chart with CIs
 plot_employed12m <- ggplot(bin_summary, aes(x = Treat, y = prop, fill = Period)) +
   geom_col(position = position_dodge(width = 0.7), width = 0.6) +
-  geom_errorbar(aes(
-    ymin = pmax(0, prop - 1.96 * se),
-    ymax = pmin(1, prop + 1.96 * se)
-  ),
-  position = position_dodge(width = 0.7),
-  width = 0.2
-  ) +
+  # geom_errorbar(aes(
+  #   ymin = pmax(0, prop - 1.96 * se),
+  #   ymax = pmin(1, prop + 1.96 * se)
+  # ),
+  # position = position_dodge(width = 0.7),
+  # width = 0.2
+  # ) +
   scale_y_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0,0.05))) +
   scale_fill_brewer(palette = "Set2") +
   labs(
@@ -158,9 +158,89 @@ plot_employed12m <- ggplot(bin_summary, aes(x = Treat, y = prop, fill = Period))
 # Save the plot
 ggsave("output/figures/final_employment12m.jpg", plot = plot_employed12m, width = 6.5, height = 5)
 
+# Descriptive statistics
+
+descr_stat = data %>% dplyr::select(treat_group, post, unempl_duration, employed_after_12_months)
 
 
 
+
+## -------------------------------------------------------------------
+##  1. Put the data in 'long' form and define the four DiD groups
+## -------------------------------------------------------------------
+did_long <- descr_stat %>% 
+  mutate(group = factor(
+    case_when(
+      treat_group == 0 & post == 0 ~ "Control (pre)",
+      treat_group == 0 & post == 1 ~ "Control (post)",
+      treat_group == 1 & post == 0 ~ "Treatment (pre)",
+      treat_group == 1 & post == 1 ~ "Treatment (post)"
+    ),
+    levels = c("Control (pre)", "Control (post)",
+               "Treatment (pre)", "Treatment (post)")
+  )) %>% 
+  pivot_longer(cols = c(unempl_duration, employed_after_12_months),
+               names_to  = "variable",
+               values_to = "value")
+
+## -------------------------------------------------------------------
+##  2. Descriptive statistics
+## -------------------------------------------------------------------
+descr_tbl <- did_long %>% 
+  group_by(variable, group) %>% 
+  summarise(
+    mean   = mean(value, na.rm = TRUE),
+    sd     = sd(value,  na.rm = TRUE),
+    p25    = quantile(value, 0.25, na.rm = TRUE),
+    median = median(value, na.rm = TRUE),
+    p75    = quantile(value, 0.75, na.rm = TRUE),
+    n      = n(),
+    .groups = "drop"
+  ) %>% 
+  
+  ## reshape so each line = one statistic for one variable --------------
+pivot_longer(cols = mean:n,
+             names_to  = "stat",
+             values_to = "estimate") %>% 
+  pivot_wider(names_from = group, values_from = estimate) %>% 
+  
+  ## nicer variable labels ----------------------------------------------
+mutate(
+  variable = factor(variable,
+                    levels  = c("unempl_duration",
+                                "employed_after_12_months"),
+                    labels  = c("Unemployment duration (days)",
+                                "Employed after 12 months (share)")),
+  stat = factor(stat, levels = c("mean","sd","median","p25","p75", "n"))
+) %>% 
+  arrange(variable, stat) %>% 
+  
+  ## format numbers: 1 decimal for days, 3 for proportions --------------
+mutate(across(`Control (pre)`:`Treatment (post)`,
+              ~ ifelse(variable == "Unemployment duration (days)" & stat != "n",
+                       formatC(.x, format = "f", digits = 1),
+                       ifelse(stat == "n",
+                              formatC(.x, format = "d"),
+                              formatC(.x, format = "f", digits = 3))))) 
+
+## -------------------------------------------------------------------
+##  3. LaTeX output (stored invisibly in descr_tbl)
+## -------------------------------------------------------------------
+descr_tbl_tex = descr_tbl %>% 
+  kable(format   = "latex",
+        booktabs = TRUE,
+        caption  = "Descriptive statistics by treatment status and period",
+        label    = "descr_stat",
+        position = "h!",
+        col.names = c("Variable", "Statistic",
+                      "Control (pre)", "Control (post)",
+                      "Treatment (pre)", "Treatment (post)")) %>% 
+  kable_styling(latex_options = c("scale_down")) %>% 
+  add_header_above(c("", "", "Control" = 2, "Treatment" = 2)) %>% 
+  collapse_rows(columns = 1, latex_hline = "major")
+
+# Write to file
+writeLines(descr_tbl_tex, "output/tables/final_descr_stat.tex")
 # ----------
 # Question 3
 # ----------
@@ -169,11 +249,15 @@ ggsave("output/figures/final_employment12m.jpg", plot = plot_employed12m, width 
 # ----------
 
 
-# Codify sex, marital status, variable
+# Codify sex, marital status, education variable
 data$sex <- ifelse(data$sex == "Female", 1,
                      ifelse(data$sex == "Male", 0, NA))
 data$marits <- ifelse(data$marits == "Married", 1,
                    ifelse(data$marits == "Unmarried", 0, NA))
+data$educ <- ifelse(data$educ == "Specialized" | data$educ == "University", 2,
+                   ifelse(data$educ == "Apprenticeship or matura", 1,
+                          ifelse(data$educ == "School", 0, NA)))
+
 # Descriptive statistics for the four groups
 descriptive_stats <- data %>%
   group_by(treat_group, post) %>%
@@ -186,6 +270,7 @@ descriptive_stats <- data %>%
     mean_rate     = mean(lastj_rate, na.rm = TRUE),
     mean_childs   = mean(child_subsidies, na.rm = TRUE),
     mean_contr_2y = mean(contr_2y, na.rm = TRUE),
+    mean_educ     = mean(educ, na.rm = T),
     .groups = 'drop'
   )
 
@@ -197,13 +282,14 @@ descriptive_tbl <- descriptive_stats %>%
     mean_age           = mean_age,               # years
     mean_earn          = mean_earn,              # currency
     mean_rate          = mean_rate,              # %
-    mean_contr_2y      = mean_contr_2y           # months
+    mean_contr_2y      = mean_contr_2y,           # months
+    mean_educ          = mean_educ
   ) %>%
   # round to one decimal place
   mutate(across(starts_with("mean_"), ~round(.x, 1))) %>%
   # rename for nicer column headers
   rename(
-    Treatment            = treat_group,
+    `Treat.`            = treat_group,
     `Post`    = post,
     N                = n,
     `Age (yrs)`      = mean_age,
@@ -212,7 +298,8 @@ descriptive_tbl <- descriptive_stats %>%
     `Earnings`       = mean_earn,
     `Act. rate (%)`  = mean_rate,
     `Child sub. (%)` = mean_childs,
-    `Contr. 2y (m)`  = mean_contr_2y
+    `Contr. 2y (m)`  = mean_contr_2y,
+    `Educ.`      = mean_educ
   )
 
 # 2) Print to LaTeX with group headers
@@ -222,13 +309,13 @@ desc_stat = descriptive_tbl %>%
     booktabs = TRUE,
     linesep = "",
     caption = "Mean observed characheristics by Treatment Group and Period",
-    label   = "tab:final_mean_char",
+    label   = "final_mean_char",
   ) %>%
   add_header_above(c(
     " " = 2,
     "Demographics" = 3,
     "Economic"     = 2,
-    "Other"        = 3
+    "Other"        = 4
   )) %>%
   kable_styling(latex_options = c("hold_position", "scale_down"))
 
@@ -424,11 +511,11 @@ data <- data %>%
                    labels = c("Control","Treated"))
   )
 
-hist_age = ggplot(data %>% filter(post == 1), aes(x = age, fill = Group)) +
+hist_age = ggplot(data %>% filter(post == 1), aes(x = age + 1, fill = Group)) +
   geom_histogram(
     position = "stack",  # overlay
     alpha    = 0.4,         # see through
-    bins     = 30           # or choose binwidth = 1
+    bins     = 30,           # or choose binwidth = 1
   ) +
   scale_fill_brewer(palette = "Set1") +
   labs(
@@ -656,11 +743,48 @@ kableExtra::kbl(
 ) %>%
   writeLines("output/tables/final_atet_results.tex")
 
-# ----------
-# Question 9
-# ----------
+# 1 x 3 plot with relation between age and pscore taken from data_comp1, data_comp2,
+# data_comp3
+# age + sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y
+ggps1 = ggplot(data_comp1, aes(x = age, y = ps1)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), expand = c(0, 0)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Treated Post vs Treated Pre",
+       x = "Age", y = "Propensity Score") +
+  theme_minimal(base_size = 14)
 
-# share of observations in the pre- and post-treatment periods by individual
+ggps2 = ggplot(data_comp2, aes(x = age, y = ps2)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), expand = c(0, 0)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Treated Post vs Controls Post",
+       x = "Age", y = "Propensity Score") +
+  theme_minimal(base_size = 14)
+
+ggps3 = ggplot(data_comp3, aes(x = age, y = ps3)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), expand = c(0, 0)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Treated Post vs Controls Pre",
+       x = "Age", y = "Propensity Score") +
+  theme_minimal(base_size = 14)
+
+# Combine the three plots into one
+
+combined <- ggarrange(
+  ggps1 + theme_minimal(base_size = 14),   # give each panel its own theme
+  ggps2 + theme_minimal(base_size = 14),
+  ggps3 + theme_minimal(base_size = 14),
+  ncol          = 3, nrow = 1,
+  common.legend = TRUE, legend = "bottom"
+)
+
+
+ggsave("output/figures/final_propensity_scores.jpg", 
+       plot = combined, width = 27, height = 10, units = "cm")
+
+data %>% nrow()
+
+data %>% group_by(id) %>% summarise(n = n()) %>% pull(n) %>% table()
+
 data %>% group_by(id) %>% summarise(pre = mean(date_start < as.Date("2013-01-01"))) %>% pull(pre) %>% table()
 
 # get data post inception of the program
