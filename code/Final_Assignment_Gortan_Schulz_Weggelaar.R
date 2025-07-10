@@ -9,7 +9,8 @@
 Sys.setlocale("LC_TIME", "C")  
 packages.vector <- c("dplyr", "stargazer", "sandwich", "lmtest", "AER", "broom", "broom.mixed", 
                      "jtools", "texreg", "kableExtra", "rstudioapi", "lubridate", "ggplot2", 
-                     "knitr", "kableExtra", "scales", "tidyr", "causalweight")
+                     "knitr", "kableExtra", "scales", "tidyr", "causalweight", "did", "purrr", 
+                     "lubridate")
 # Load necessary libraries
 lapply(packages.vector, require, character.only = TRUE)
 # Load the data
@@ -394,49 +395,24 @@ ggsave("output/figures/final_unemployment_duration_over_time.jpg", plot = p2, wi
 # Parallel trends assumption
 # ----------
 
-data_post <- data %>%
-  filter(post == 1) %>%
-  mutate(
-    tmonth_start = date_start %>% `day<-`(1),
-    tmonth_end   = date_end %>% `day<-`(1),
-    mtime_start = ceiling((ymd(min(date_start, na.rm = T)) %--% tmonth_start) / dmonths(1)) + 1,
-    mtime_end = ceiling((ymd(min(date_start, na.rm = T)) %--% tmonth_end) / dmonths(1)) + 1
-  ) %>%
-  select(id, mtime_start, mtime_end, treat) %>%
-  drop_na()
+data %>%
+  group_by(id) %>%
+  summarize(age_diff = mean(date_start[lubridate::year(date_start) > 2013] - 
+                              date_start[lubridate::year(date_start) <= 2013], na.rm = TRUE) / dyears(1)) %>%
+  summarise(min_age_diff = min(age_diff, na.rm = TRUE),
+            max_age_diff = max(age_diff, na.rm = TRUE))
 
-create_subpanel <- function(id, mtime_start, mtime_end, treat) {
-  tibble(
-    id              = id,
-    mtime           = seq(mtime_start, 24, 1),
-    gtime           = ifelse(treat > 1, mtime_start + (treat - 1), 0),
-    employed        = ifelse(((mtime >= mtime_start) & (mtime < mtime_end)), 0, 1),
-  )
-}
+age_unemp_plot <- ggplot(data, aes(x = age, y = unempl_duration)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  geom_smooth(method = "loess", se = FALSE, color = "red") +
+  labs(
+    x     = "Age (years)",
+    y     = "Unemployment Duration (days)"
+  ) +
+  theme_bw(base_size = 14)
 
-event_study_panel <- purrr::pmap_df(data_post, create_subpanel)
-
-library(did)
-
-att_gt(
-  yname     = "employed",
-  tname     = "mtime",
-  gname     = "gtime",
-  idname    = "id",
-  data      = event_study_panel,
-  control_group = "nevertreated"
-) -> est
-
-aggte(est, type = "dynamic", na.rm = T) -> es
-
-ggdid(
-  es,
-  xlab = "Months since treatment",
-  ylab = "Employment rate",
-  title = "Event Study: Employment Rate by Months since Treatment",
-  theme = theme_minimal(base_size = 14)
-)
-ggsave("output/figures/final_event_study_employment_rate.jpg", width = 6.5, height = 5)
+ggsave("output/figures/final_age_unempl_duration.jpg", age_unemp_plot, width = 6.5, height = 5)
 
 # Common support
 #----------
@@ -672,7 +648,7 @@ comparison_results <- data.frame(
 kableExtra::kbl(
   comparison_results,
   format = "latex",
-  col.names = c("Outcome", "ATET", "E[Y|T=1,D=1]", "E[Y(0,1)|T=1]", "E[Y(1,0)|T=1]", "E[Y(0,0)|T=1]"),
+  col.names = c("Outcome", "ATET", "$E[Y|T=1,D=1]$", "$E[Y(0,1)|T=1]$", "$E[Y(1,0)|T=1]$", "$E[Y(0,0)|T=1]$"),
   digits = 2,
   caption = "ATET Results using Propensity Score Method from Slides",
   booktabs = TRUE,
@@ -680,21 +656,92 @@ kableExtra::kbl(
 ) %>%
   writeLines("output/tables/final_atet_results.tex")
 
+# ----------
+# Question 9
+# ----------
 
-
-data %>% nrow()
-
-data %>% group_by(id) %>% summarise(n = n()) %>% pull(n) %>% table()
-
+# share of observations in the pre- and post-treatment periods by individual
 data %>% group_by(id) %>% summarise(pre = mean(date_start < as.Date("2013-01-01"))) %>% pull(pre) %>% table()
 
+# get data post inception of the program
+# get normalized monthly event time
+data_post <- data %>%
+  filter(post == 1) %>%
+  mutate(
+    tmonth_start = date_start %>% `day<-`(1),
+    tmonth_end   = date_end %>% `day<-`(1),
+    mtime_start = ceiling((ymd(min(date_start, na.rm = T)) %--% tmonth_start) / dmonths(1)) + 1,
+    mtime_end = ceiling((ymd(min(date_start, na.rm = T)) %--% tmonth_end) / dmonths(1)) + 1
+  ) %>%
+  select(id, mtime_start, mtime_end, treat) %>%
+  drop_na()
 
-data %>% select(date_start) %>% 
-  mutate(year = year(date_start)) %>%
-  group_by(year) %>%
-  summarise(n = n()) %>%
-  ggplot(aes(x = year, y = n)) +
-  geom_col() +
-  labs(title = "Number of Unemployment Spells by Year", x = "Year", y = "Count") +
-  theme_minimal(base_size = 14)
+# a function to create a subpanel for each individual
+create_subpanel <- function(id, mtime_start, mtime_end, treat) {
+  tibble(
+    id              = id,
+    mtime           = seq(mtime_start, 24, 1),
+    gtime           = ifelse(treat > 1, mtime_start + (treat - 1), 0),
+    employed        = ifelse(((mtime >= mtime_start) & (mtime < mtime_end)), 0, 1),
+  )
+}
 
+# create a subpanel for each individual
+event_study_panel <- pmap_df(data_post, create_subpanel)
+
+###
+# Event study w/o controls
+###
+
+att_gt(
+  yname     = "employed",
+  tname     = "mtime",
+  gname     = "gtime",
+  idname    = "id",
+  data      = event_study_panel,
+  control_group = "nevertreated"
+) -> est
+
+aggte(est, type = "dynamic", na.rm = T) -> es
+
+ggdid(
+  es,
+  xlab = "Months since treatment",
+  ylab = "Employment rate",
+  title = "Event Study without Controls",
+  theme = theme_minimal(base_size = 14)
+)
+ggsave("output/figures/final_event_study_employment_rate.jpg", width = 6.5, height = 5)
+
+###
+# Event study WITH controls
+###
+
+controls <- data %>%
+  select(id, age, sex, marits, insured_earn, lastj_rate, child_subsidies, contr_2y) %>% 
+  group_by(id) %>%
+  summarise(
+    across(everything(), ~ tail(.x, n = 1, na.rm = TRUE)),
+  )
+
+est_controls <- att_gt(
+  yname     = "employed",
+  tname     = "mtime",
+  gname     = "gtime",
+  idname    = "id",
+  data      = event_study_panel %>%
+                left_join(controls, by = "id"),
+  control_group = "nevertreated",
+  xformla   = ~ sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y
+)
+
+es_controls <- aggte(est_controls, type = "dynamic", na.rm = TRUE)
+
+ggdid(
+  es_controls,
+  xlab = "Months since treatment",
+  ylab = "Employment rate",
+  title = "Event Study including Controls",
+  theme = theme_minimal(base_size = 14)
+)
+ggsave("output/figures/final_event_study_employment_rate_controls.jpg", width = 6.5, height = 5)
