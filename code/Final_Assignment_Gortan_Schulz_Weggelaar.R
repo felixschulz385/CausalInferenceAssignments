@@ -769,33 +769,41 @@ kableExtra::kbl(
 
 # 1 x 3 plot with relation between age and pscore taken from data_comp1, data_comp2,
 # data_comp3
+# age + sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y
 ggps1 = ggplot(data_comp1, aes(x = age, y = ps1)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), expand = c(0, 0)) +
   geom_point(alpha = 0.5) +
-  labs(title = "Propensity Score for Treated Post vs Treated Pre",
+  labs(title = "Treated Post vs Treated Pre",
        x = "Age", y = "Propensity Score") +
   theme_minimal(base_size = 14)
 
 ggps2 = ggplot(data_comp2, aes(x = age, y = ps2)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), expand = c(0, 0)) +
   geom_point(alpha = 0.5) +
-  labs(title = "Propensity Score for Treated Post vs Controls Post",
+  labs(title = "Treated Post vs Controls Post",
        x = "Age", y = "Propensity Score") +
   theme_minimal(base_size = 14)
 
 ggps3 = ggplot(data_comp3, aes(x = age, y = ps3)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), expand = c(0, 0)) +
   geom_point(alpha = 0.5) +
-  labs(title = "Propensity Score for Treated Post vs Controls Pre",
+  labs(title = "Treated Post vs Controls Pre",
        x = "Age", y = "Propensity Score") +
   theme_minimal(base_size = 14)
 
 # Combine the three plots into one
-ggarrange(
-  ggps1, ggps2, ggps3,
-  ncol = 3, nrow = 1,
-  labels = c("A", "B", "C"),
+
+combined <- ggarrange(
+  ggps1 + theme_minimal(base_size = 14),   # give each panel its own theme
+  ggps2 + theme_minimal(base_size = 14),
+  ggps3 + theme_minimal(base_size = 14),
+  ncol          = 3, nrow = 1,
   common.legend = TRUE, legend = "bottom"
-) +
-  labs(title = "Propensity Scores by Age for Different Comparisons") +
-  theme_minimal(base_size = 14)
+)
+
+
+ggsave("output/figures/final_propensity_scores.jpg", 
+       plot = combined, width = 27, height = 10, units = "cm")
 
 data %>% nrow()
 
