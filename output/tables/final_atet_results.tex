@@ -1,7 +1,8 @@
 \begin{table}
-
-\caption{ATET Results using Propensity Score Method from Slides}
 \centering
+\caption{ATET Results}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \begin{tabular}[t]{lccccc}
 \toprule
 Outcome & ATET & $E[Y|T=1,D=1]$ & $E[Y(0,1)|T=1]$ & $E[Y(1,0)|T=1]$ & $E[Y(0,0)|T=1]$\\
@@ -9,5 +10,5 @@ Outcome & ATET & $E[Y|T=1,D=1]$ & $E[Y(0,1)|T=1]$ & $E[Y(1,0)|T=1]$ & $E[Y(0,0)|
 Unemployment Duration & -35.45 & 242.18 & 235.91 & 175.60 & 133.87\\
 Employment after 12 months & 0.05 & 0.81 & 0.77 & 0.94 & 0.95\\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

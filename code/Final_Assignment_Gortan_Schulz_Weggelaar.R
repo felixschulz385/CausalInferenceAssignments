@@ -588,6 +588,7 @@ texreg(
     "(Intercept)", "Treated", "Post", "Treated * Post", "Age", "Sex", "Marital Status", 
     "Insured Earnings", "Last Job Rate", "Child Subsidies", "Contributions 2y"
   ),
+  custom.gof.rows = list("Controls" = c("", "\\checkmark", "", "\\checkmark")),
   omit.coef = "(age)|(sex)|(marits)|(insured_earn)|(lastj_rate)|(child_subsidies)|(contr_2y)",
   stars = c(0.01, 0.05, 0.1),
   caption = "OLS Results for Unemployment Duration and Employment After 12 Months",
@@ -596,6 +597,7 @@ texreg(
   dcolumn = TRUE,
   booktabs = TRUE,
   use.packages = FALSE,
+  threeparttable = TRUE,
   override.se = list(ols_se, ols_covariates_se, ols_se_emp, ols_covariates_se_emp),
   override.pvalues = list(ols_p, ols_covariates_p, ols_p_emp, ols_covariates_p_emp),
   custom.note = "Covariates include age, gender, marital status, earning insured by unemployment insurance, activity rate in the last job, receiving child subsidies, months of employment in the 2 years prior to unemployment. Standard errors clustered at the individual level. $^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$",
@@ -737,11 +739,12 @@ kableExtra::kbl(
   format = "latex",
   col.names = c("Outcome", "ATET", "$E[Y|T=1,D=1]$", "$E[Y(0,1)|T=1]$", "$E[Y(1,0)|T=1]$", "$E[Y(0,0)|T=1]$"),
   digits = 2,
-  caption = "ATET Results using Propensity Score Method from Slides",
+  caption = "ATET Results",
   booktabs = TRUE,
   align = "lcccccc",
   escape = FALSE
-) %>%
+) %>% 
+  kable_styling(latex_options="scale_down") %>%
   writeLines("output/tables/final_atet_results.tex")
 
 # 1 x 3 plot with relation between age and pscore taken from data_comp1, data_comp2,
