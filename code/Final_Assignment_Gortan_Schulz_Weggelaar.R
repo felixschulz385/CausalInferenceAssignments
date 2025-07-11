@@ -739,7 +739,8 @@ kableExtra::kbl(
   digits = 2,
   caption = "ATET Results using Propensity Score Method from Slides",
   booktabs = TRUE,
-  align = "lcccccc"
+  align = "lcccccc",
+  escape = FALSE
 ) %>%
   writeLines("output/tables/final_atet_results.tex")
 
@@ -828,6 +829,14 @@ att_gt(
 
 aggte(est, type = "dynamic", na.rm = T) -> es
 
+broom::tidy(es) %>%
+  mutate(CI = paste0("$[", sprintf("%.3f", conf.low), " , ", sprintf("%.3f", conf.high), "]$")) %>%
+  select(t = event.time, coef = estimate, SE = std.error, CI) %>%
+  filter(t %in% -4:10) %>%
+  kableExtra::kbl("latex", digits = 3, escape = F, booktabs = T, linesep = "") %>%
+  writeLines("output/tables/final_event_study.tex")
+
+
 ggdid(
   es,
   xlab = "Months since treatment",
@@ -861,6 +870,13 @@ est_controls <- att_gt(
 
 es_controls <- aggte(est_controls, type = "dynamic", na.rm = TRUE)
 
+broom::tidy(es_controls) %>%
+  mutate(CI = paste0("$[", sprintf("%.3f", conf.low), " , ", sprintf("%.3f", conf.high), "]$")) %>%
+  select(t = event.time, coef = estimate, SE = std.error, CI) %>%
+  filter(t %in% -4:10) %>%
+  kableExtra::kbl("latex", digits = 3, escape = F, booktabs = T, linesep = "") %>%
+  writeLines("output/tables/final_event_study_controls.tex")
+
 ggdid(
   es_controls,
   xlab = "Months since treatment",
@@ -869,3 +885,4 @@ ggdid(
   theme = theme_minimal(base_size = 14)
 )
 ggsave("output/figures/final_event_study_employment_rate_controls.jpg", width = 6.5, height = 5)
+
