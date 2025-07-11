@@ -342,7 +342,7 @@ It is worth mentioning that \textit{age} alone is a good predictor of the propen
 
 The existing panel structure of the data only only allows for limited extensions. The main challenge is that the data is indexed by unemployment spell. In order to turn this into a full, balanced panel at the individual level with monthly observations, we need to assume that at least for the 2015 period, we have information about all unemployment spells of the individuals. In other words, we should be able to safely assume that any period not covered in the data means the individual is employed. Doing that, we are able to transform the data into such a panel where the outcome variable is the binary employment status and we have cross-sectional demographic information.
 
-The resulting panel allows us to investigate treatment effects on employment status at arbitrary temporary lags and leads. Because actual treatment months differ, we employ the \cite{callawayDifferenceinDifferencesMultipleTime2020} estimator, which accounts for the potential negative weights problem. This regresses employment on leads and lags of treatment with the program per treatment cohort, using the never treated as the control group. Then, we aggregate the results into a plot, employing the robust cohorts weights implement in the R package accompanying the estimator. We present our results in an event-study plot in Figure~\ref{fig:event_study} and in Table~\ref{}.
+The resulting panel allows us to investigate treatment effects on employment status at arbitrary temporary lags and leads. Because actual treatment months differ, we employ the \cite{callawayDifferenceinDifferencesMultipleTime2020} estimator, which accounts for the potential negative weights problem. This regresses employment on leads and lags of treatment with the program per treatment cohort, using the never treated as the control group. Then, we aggregate the results into a plot, employing the robust cohorts weights implement in the R package accompanying the estimator. We present our results in an event-study plot in Figure~\ref{fig:event_studies}.
 
 \begin{figure}[h!]
   \centering
@@ -362,7 +362,7 @@ The resulting panel allows us to investigate treatment effects on employment sta
   \end{subfigure}
 
   \caption{Training program and employment: Event Studies}
-  \label{fig:}
+  \label{fig:event_studies}
 \end{figure}
 
 \paragraph*{10.}
