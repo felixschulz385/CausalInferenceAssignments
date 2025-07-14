@@ -787,6 +787,10 @@ combined <- ggarrange(
 ggsave("output/figures/final_propensity_scores.jpg", 
        plot = combined, width = 27, height = 10, units = "cm")
 
+# ----------
+# Question 9
+# ----------
+
 data %>% nrow()
 
 data %>% group_by(id) %>% summarise(n = n()) %>% pull(n) %>% table()
@@ -810,7 +814,7 @@ data_post <- data %>%
 create_subpanel <- function(id, mtime_start, mtime_end, treat) {
   tibble(
     id              = id,
-    mtime           = seq(1, 24, 1),
+    mtime           = seq(mtime_start, 24, 1),
     gtime           = ifelse(treat > 1, mtime_start + (treat - 1), 0),
     employed        = ifelse(((mtime >= mtime_start) & (mtime < mtime_end)), 0, 1),
   )
@@ -838,9 +842,9 @@ aggte(
   est,   
   type = "dynamic", 
   na.rm = TRUE,
-  balance_e = 6,
+  #balance_e = 6,
   min_e = -4,
-  max_e = 10
+  max_e = 12
   ) -> es
 
 # broom::tidy(es) %>%
@@ -878,38 +882,24 @@ est_controls <- att_gt(
   data      = event_study_panel %>%
                 left_join(controls, by = "id"),
   control_group = "nevertreated",
-  xformla   = ~ sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y,
+  xformla   = ~ age + sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y,
   base_period = "universal"
 )
-
-event_study_panel %>% View()
-
-event_study_panel %>%
-  filter(gtime == 0) %>%
-  group_by(id)
-
-event_study_panel %>%
-  group_by(test = gtime == 0) %>%
-  summarise(
-    n = n(),
-    mean_employed = mean(employed, na.rm = TRUE)
-  )
-    
 
 es_controls <- aggte(
   est_controls, 
   type = "dynamic", 
   na.rm = TRUE,
   min_e = -4,
-  max_e = 18
+  max_e = 12
   )
 
-broom::tidy(es_controls) %>%
-  mutate(CI = paste0("$[", sprintf("%.3f", conf.low), " , ", sprintf("%.3f", conf.high), "]$")) %>%
-  select(t = event.time, coef = estimate, SE = std.error, CI) %>%
-  filter(t %in% -4:10) %>%
-  kableExtra::kbl("latex", digits = 3, escape = F, booktabs = T, linesep = "") %>%
-  writeLines("output/tables/final_event_study_controls.tex")
+# broom::tidy(es_controls) %>%
+#   mutate(CI = paste0("$[", sprintf("%.3f", conf.low), " , ", sprintf("%.3f", conf.high), "]$")) %>%
+#   select(t = event.time, coef = estimate, SE = std.error, CI) %>%
+#   filter(t %in% -4:10) %>%
+#   kableExtra::kbl("latex", digits = 3, escape = F, booktabs = T, linesep = "") %>%
+#   writeLines("output/tables/final_event_study_controls.tex")
 
 ggdid(
   es_controls,
