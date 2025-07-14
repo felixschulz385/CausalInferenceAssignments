@@ -7,11 +7,15 @@
 \usepackage{dcolumn}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{threeparttable}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{titling}
 \usepackage{xcolor}
 \usepackage{amsmath}
+
+\usepackage[hidelinks]{hyperref}
+
 \usepackage[table,xcdraw]{xcolor}
 
 \usepackage[
@@ -118,9 +122,6 @@ Variable & Statistic & Control (pre) & Control (post) & Treatment (pre) & Treatm
 \end{table}
 
 
-
-
-
 \begin{figure}[h!]
   \centering
   %–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -167,7 +168,7 @@ Figure \ref{fig:density} shows the sample distribution of the four groups. We ca
   \label{fig:combined2}
 \end{figure}
 
-Lastly, we wanted to investigate the share of treated vs. control units and the share of pre- vs. post-treatment periods per canton in this dataset. The dataset is notably balanced over all cantons, having between 12\% to 18\% of treated units compared to control units for all Cantons. This means that there is a somewhat equal representation from each cantons, and that treated units are not over-represented in some cantons compared to control units. We observe the same in figure \ref{fig:map_post}, with a close to equal split between pre- and post-treatment periods per canton in our dataset. One notable absence from this dataset is the Canton of Zurich, which has the highest population in Switzerland. The reason is unknown, but it might be that the training program was not offered there and was therefore excluded from the dataset.
+Lastly, we wanted to investigate the share of treated vs.\ control units and the share of pre- vs.\ post-treatment periods per canton in this dataset. The dataset is notably balanced over all cantons, having between 12\% to 18\% of treated units compared to control units for all Cantons. This means that there is a somewhat equal representation from each cantons, and that treated units are not over-represented in some cantons compared to control units. We observe the same in figure \ref{fig:map_post}, with a close to equal split between pre- and post-treatment periods per canton in our dataset. One notable absence from this dataset is the Canton of Zurich, which has the highest population in Switzerland. The reason is unknown, but it might be that the training program was not offered there and was therefore excluded from the dataset.
 
 
   
@@ -177,14 +178,14 @@ Lastly, we wanted to investigate the share of treated vs. control units and the 
 
 % - Maybe add education
 % - Map of switzerland
-Table \ref{tab:tab:final_mean_char} shows the mean observed characteristics for all four relevant groups. We note that treated people:
+Table \ref{tab:final_mean_char} shows the mean observed characteristics for all four relevant groups. We note that treated people:
 
 \begin{itemize}[label=$\blacktriangleright$]
-    \item \textbf{Are older}. This is expected given how the policy has been implemented; \
+    \item \textbf{Are older}. This is mechanical given how the policy is implemented. \
     \item \textbf{Are prevalently women}. \
     \item \textbf{Have higher insured earnings.} This might reglect that they are older compared to non-treated. \
     \item \textbf{Had higher part-time rates}. \
-    \item \textbf{Receive more children subsidies.} Again, this might reflect that they are older than non-treated \
+    \item \textbf{Receive more child subsidies.} Again, this might reflect that they are older than the non-treated. \
     \item \textbf{Have worked a similar number of months preceding unemployment}. \ 
     \item \textbf{Have similar education levels compared to control.} This might be somewhat surprising, given the big age difference between the two groups. 
     
@@ -192,7 +193,7 @@ Table \ref{tab:tab:final_mean_char} shows the mean observed characteristics for 
 
 \begin{table}[!h]
 \centering
-\caption{\label{tab:final_mean_char}Mean observed characheristics by Treatment Group and Period}
+\caption{\label{tab:final_mean_char}Mean observed characteristics by Treatment Group and Period}
 \centering
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \begin{tabular}[t]{rrrrrrrrrrr}
@@ -255,7 +256,7 @@ Figure \ref{fig:combined_overtime} shows the evolution of the outcome variables 
 % Discuss the validity of the identifying assumptions in this specific case. Provide and discuss supporting evidence if possible, incl. event study estimates. [8 points]
 
 \begin{itemize}[label=$\blacktriangleright$]
-    \item \textbf{Stable unit treatment value assumption (SUTVA)}. SUTVA is not respected in case non-participating people are affected by those who join the program. It's possible that competition effects arise because many people apply for the same position and those who participated in the program win at the expense of others. However, it's also true that such programs might help reduce the mismatch between the skills looked for by employers and the skills of the employees. In addition, the age difference between the treatment and control groups is quite large as evidenced from figure \ref{fig:age_hist}, and table \ref{tab:tab:final_mean_char}, which specifies an average of 20 year difference. It might very well be the case that the two groups tend to apply for different kinds of jobs that require different levels of experience. If that is the case, then SUTVA is not violated, and we continue our analysis assuming that it holds.\
+    \item \textbf{Stable unit treatment value assumption (SUTVA)}. SUTVA is not respected in case non-participating people are affected by those who join the program. It's possible that competition effects arise because many people apply for the same position and those who participated in the program win at the expense of others. However, it's also true that such programs might help reduce the mismatch between the skills looked for by employers and the skills of the employees. In addition, the age difference between the treatment and control groups is quite large as evidenced from figure \ref{fig:age_hist}, and table \ref{tab:final_mean_char}, which specifies an average of 20 year difference. It might very well be the case that the two groups tend to apply for different kinds of jobs that require different levels of experience. If that is the case, then SUTVA is not violated, and we continue our analysis assuming that it holds.\
 
     \item \textbf{No anticipation assumption (NA)}. According to the text, `\textit{Prior discussions about this policy change have remained confidential, so that neither caseworkers nor the unemployed had knowledge about it before this date}. If that is true, then this assumption is respected. \
 
@@ -266,9 +267,11 @@ Figure \ref{fig:combined_overtime} shows the evolution of the outcome variables 
             \label{fig:age_hist}
         \end{figure}
 
-    \item \textbf{Common trend assumption (CT).} Ideally we would like to present an event study to investigate pre-trends. That design needs outcomes observed reliably at several points before and after the moment treatment begins for every treated unit, so that one can plot and test the lead-lags coefficients. We only have data for two calendar years (2010 and 2015). In order to construct a multi-period outcome panel, we need to make additional, strong assumptions on the data and cannot investigate the two outcomes asked for. We believe that this approach best fits a later task description and present the results of this analysis in Figure~\ref{fig:event_study}. \\
+    \item \textbf{Common trend assumption (CT).} Ideally we would like to present an event study to investigate pre-trends. That design needs outcomes observed reliably at several points before and after the moment treatment begins for every treated unit, so that one can plot and test the lead-lags coefficients. We only have data for two calendar years (2010 and 2015). In order to construct a multi-period outcome panel, we need to make additional, strong assumptions on the data and cannot investigate the two outcomes asked for. We believe that this approach best fits a later task description and present the results of this analysis in Figure~\ref{fig:event_studies}. \\
     
-    While unable to observe pre-trends and their parallelism, we want to make several theoretical statements towards the CT assumption. The task description noted that there was qualitative evidence for self-selection into treatment. Observing take-up rates within eligibility groups, we find that an overwhelming majority of those allowed to participate do take up on the opportunity. This means that at least for our data sample, self-selection appears to be limited. The central remaining issue is that our two groups of comparison mechanically differ significantly due to the fact that they are selected by age. This would break CT if the probability of reemployment decreased nonlinearly across age. If those participating in the program, who are necessarily older than the control group, had worse trends, CT is broken. In Figure~\ref{fig:age-unemp} however, we show that within the entire sample, unemployment duration increases with age in an almost perfectly linear fashion. Barring any other shocks to employment affecting the two groups differently we think that we have a good case for the CT assumption to hold, even unconditionally on covariates.
+    While unable to observe pre-trends and their parallelism, we want to make several theoretical statements towards the CT assumption. The task description noted that there was qualitative evidence for self-selection into treatment. Observing take-up rates within eligibility groups, we find that an overwhelming majority of those allowed to participate do take up on the opportunity. This means that at least for our data sample, self-selection appears to be limited. 
+    
+    The central remaining issue is that our two groups of comparison mechanically differ significantly due to the fact that they are selected by age. This would break CT if the probability of reemployment decreased nonlinearly across age. In other words, if job prospects decrease stronger annually at old age, CT is broken. In Figure \ref{fig:age-unemp}, we show that within the entire sample, unemployment duration increases with age in an almost perfectly linear fashion. We however still think that the issue might remain. We also cannot rule out that any other shocks to employment affected the two groups differently between 2011 and 2015. Controlling for the covariates available to us does alleviate some of the concern. Nevertheless, we think that with the information available to us, we cannot confidently make the common trend assumption.
     %First and foremost, we believe that the panel structure mechanically breaks CT. The data is mainly comprised of individuals for which we have one pre and one post introduction observation. Between these two observations, individuals age by three to five, but on average about four years. We believe it is reasonable to assume that the probability of reemployment decreases with age. We also believe that decreases nonlinearly First of all, we note that the average age difference between the treatment and control group is very high. We can see this as well in figure ~\ref{fig:age_hist}, where the vast majority of people that satisfy the age requirement of >45 years, will get treated. This means that treatment and control groups are fundamentally different in their potential outcomes, since younger people are more likely to find a job and have shorter unemployment spells compared to older people. Furthermore, the prospects of finding a job for older people get significantly worse as time passes while for young people not as much (their employability from being 30 compared to 35 is relatively the same). 
     %This huge drawback means that we cannot assume that the estimates have a causal interpretation, and we will need to use extensions to the standard DiD approach in order to do causal estimation and inference. In later questions we will perform a semi-parametric DiD approach that combines matching and DiD, in order to have treatment and control groups that are more similar to each other.  We will also transform the initial dataset to allow for a staggered approach to DiD. In the 2x2 DiD setting, where we observe the unemployment spells before the treatment (in 2011) and after (in 2015), we believe it is very likely that it doesn't hold. 
 
@@ -294,7 +297,9 @@ Y_{it} = \alpha + \beta_1 \text{Treat}_i + \beta_2 \text{Post}_t + \beta_3 (\tex
 $$
 where \( Y_{it} \) is the outcome of interest for unit \( i \) at time \( t \), \( \text{Treat}_i \) is an indicator variable equal to 1 if the unit belongs to the treatment group, \( \text{Post}_t \) is an indicator equal to 1 for the post-treatment period, and the interaction term \( \text{Treat}_i \times \text{Post}_t \) captures the difference-in-differences (DiD) estimator \( \beta_3 \), which is our main coefficient of interest. \\
 
-We estimate the model using Ordinary Least Squares (OLS). Nevertheless, we believe that, for the reasons stated above, the common trends assumption does not hold, and so this estimate may not accurately estimate the ATT. Adding covariates does help to increase precision and help control for residual confounding, but it doesn't tackle our main issue which is that we cannot assume parallel trends. We will however we also present results controlling for the covariates.
+We estimate the model using Ordinary Least Squares (OLS). Nevertheless, we believe that, for the reasons stated above, the common trends assumption does not hold, and so this estimate may not accurately estimate the ATT. Adding covariates does help to increase precision and help control for residual confounding. However, as stated above, we shy away from claiming that CT holds even conditional on the set of covariates. Also, we note that given the binary nature of the outcome variable, a logit or probit model would be more suitable when investigating impacts on re-employment probability.
+
+We find that the treated group has longer unemployment spells and are less likely to be employed after 12 months c.p. The average duration of spells increased from 2011 to 2015, and the chance of re-employment within 12 months decreased. The treatment parameter of interest is statistically and economically significant. We find that the program decreased the duration of unemployment spells by about 28 days c.p., irrespective of the model specification. We also find that it increased the probability of re-employment by 7 percentage points all else unchanged.
 
 \input{output/tables/final_ols_results_combined}
 
@@ -302,7 +307,7 @@ We estimate the model using Ordinary Least Squares (OLS). Nevertheless, we belie
 % Implement the DiD using a semi-parametric estimator based on the propensity score. Describe
 % in detail what you do and why. Discuss the results and compare them to the OLS estimates.
 % [10 points]
-The problem of normal parametric diff-in-diff is that if (i) individual characteristics are associated with the outcome variable and (ii) characteristics are imbalanced over the groups, it's likely that the common trend assumption does not hold. The semi-parametric DiD estimator offers a more flexible and robust estimator, as it relies on more relaxed versions of the identifying assumptions (e.g. conditional parallel trends). This approach allows us to weight observations in the control more if their covariates are more similar to those in the treatment group, and give less weight to those observations that are very different. The steps are as follows:
+The problem of normal parametric DiD is that if (i) individual characteristics are associated with the outcome variable and (ii) characteristics are imbalanced over the groups, it's likely that the common trend assumption does not hold. The semi-parametric DiD estimator offers a more flexible and robust estimator, as it relies on more relaxed versions of the identifying assumptions (i.e.\ conditional parallel trends). This approach allows us to weight observations in the control more if their covariates are more similar to those in the treatment group, and give less weight to those observations that are very different. The steps are as follows:
 % We can check if the weighted average age is the same between control and treatment 
 
 \begin{enumerate}
@@ -322,7 +327,7 @@ The problem of normal parametric diff-in-diff is that if (i) individual characte
 \]
 \end{enumerate}
 
-\input{output/tables/final_atet_results}
+
 
 It is worth mentioning that \textit{age} alone is a good predictor of the propensity score. In fact, the treated and control groups differ mainly in their age. As it consequently is in general quite difficult to find a precise counterfactual for the treated units, the propensity score models weigh the age characteristic much more than other observable characteristics. This is quite visible by plotting, in Figure \ref{fig:prop_scores}, the relationship between the propensity score and age, for the three groups that are used in comparison with the post and treated units. 
 
@@ -333,6 +338,9 @@ It is worth mentioning that \textit{age} alone is a good predictor of the propen
     \label{fig:prop_scores}
 \end{figure}
 
+The results of the 
+
+\input{output/tables/final_atet_results}
 
 \paragraph*{9.}
 % Discuss different ways of exploiting the panel structure of the data and implement one of them.
@@ -342,7 +350,9 @@ It is worth mentioning that \textit{age} alone is a good predictor of the propen
 
 The existing panel structure of the data only only allows for limited extensions. The main challenge is that the data is indexed by unemployment spell. In order to turn this into a full, balanced panel at the individual level with monthly observations, we need to assume that at least for the 2015 period, we have information about all unemployment spells of the individuals. In other words, we should be able to safely assume that any period not covered in the data means the individual is employed. Doing that, we are able to transform the data into such a panel where the outcome variable is the binary employment status and we have cross-sectional demographic information.
 
-The resulting panel allows us to investigate treatment effects on employment status at arbitrary temporary lags and leads. Because actual treatment months differ, we employ the \cite{callawayDifferenceinDifferencesMultipleTime2020} estimator, which accounts for the potential negative weights problem. This regresses employment on leads and lags of treatment with the program per treatment cohort, using the never treated as the control group. Then, we aggregate the results into a plot, employing the robust cohorts weights implement in the R package accompanying the estimator. We present our results in an event-study plot in Figure~\ref{fig:event_studies}.
+The resulting panel allows us to investigate treatment effects on employment status at arbitrary temporary lags and leads. Because actual treatment months differ, we employ the \cite{callawayDifferenceinDifferencesMultipleTime2020} estimator, which accounts for the potential negative weights problem. This regresses employment on leads and lags of treatment with the program per treatment cohort, using the never treated as the control group. Then, we aggregate the results into an event study type plot, employing the robust cohort weights implemented in the R package accompanying the estimator. 
+
+We present our results in an event-study plot in Figure~\ref{fig:event_studies}. 
 
 \begin{figure}[h!]
   \centering
