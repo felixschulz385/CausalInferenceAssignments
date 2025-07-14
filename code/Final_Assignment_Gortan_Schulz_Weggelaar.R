@@ -592,6 +592,7 @@ texreg(
   omit.coef = "(age)|(sex)|(marits)|(insured_earn)|(lastj_rate)|(child_subsidies)|(contr_2y)",
   stars = c(0.01, 0.05, 0.1),
   caption = "OLS Results for Unemployment Duration and Employment After 12 Months",
+  caption.above = TRUE,
   label = "tab:final_ols_results_combined",
   file = "output/tables/final_ols_results_combined.tex",
   dcolumn = TRUE,
