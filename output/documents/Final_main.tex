@@ -338,7 +338,7 @@ It is worth mentioning that \textit{age} alone is a good predictor of the propen
     \label{fig:prop_scores}
 \end{figure}
 
-The results of the analysis are presented in Table~\ref{tab:final_atet_results}. We estimate that the program decreased unemployment duration by about 35 days c.p.\ and increased the probability of finding another job within 12 months by 0.05 percentage points. These findings differ from earlier findings based on OLS presented in Table~\ref{tab:final_ols_results}
+The results of the analysis are presented in Table~\ref{tab:final_atet_results}. We estimate that the program decreased unemployment duration by about 35 days c.p.\ and increased the probability of finding another job within 12 months by 0.05 percentage points. The magnitude of these findings differs slightly from earlier findings based on OLS presented in Table~\ref{tab:final_ols_results_combined}. The overall interpretation of the treatment effect remains the same regardless of the model applied.
 
 \input{output/tables/final_atet_results}
 
@@ -348,7 +348,7 @@ The results of the analysis are presented in Table~\ref{tab:final_atet_results}.
 % approaches you used before. Describe in detail what you do and why. Discuss the results and
 % compare them the other estimates. [10 points
 
-The existing panel structure of the data only only allows for limited extensions. The main challenge is that the data is indexed by unemployment spell. In order to turn this into a full, balanced panel at the individual level with monthly observations, we need to assume that at least for the 2015 period, we have information about all unemployment spells of the individuals. In other words, we should be able to safely assume that any period not covered in the data means the individual is employed. Doing that, we are able to transform the data into such a panel where the outcome variable is the binary employment status and we have cross-sectional demographic information.
+The existing panel structure of the data only only allows for limited extensions. The main challenge is that the data is indexed by unemployment spell. In order to turn this into a full, balanced panel at the individual level with monthly observations, we need to assume that we have information about all unemployment spells of the individuals. In other words, we should be able to safely assume that any period not covered in the data means the individual is employed. Doing that, we are able to transform the data into such a panel where the outcome variable is the binary employment status and we have cross-sectional demographic information.
 
 The resulting panel allows us to investigate treatment effects on employment status at arbitrary temporary lags and leads. Because actual treatment months differ, we employ the \cite{callawayDifferenceinDifferencesMultipleTime2020} estimator, which accounts for the potential negative weights problem. This regresses employment on leads and lags of treatment with the program per treatment cohort, using the never treated as the control group. Then, we aggregate the results into an event study type plot, employing the robust cohort weights implemented in the R package accompanying the estimator. 
 
