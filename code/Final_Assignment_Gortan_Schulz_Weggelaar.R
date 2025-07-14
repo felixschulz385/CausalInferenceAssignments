@@ -740,7 +740,7 @@ kableExtra::kbl(
   col.names = c("Outcome", "ATET", "$E[Y|T=1,D=1]$", "$E[Y(0,1)|T=1]$", "$E[Y(1,0)|T=1]$", "$E[Y(0,0)|T=1]$"),
   digits = 2,
   caption = "ATET Results",
-  label = "tab:final_atet_results",
+  label = "final_atet_results",
   booktabs = TRUE,
   align = "lcccccc",
   escape = FALSE
