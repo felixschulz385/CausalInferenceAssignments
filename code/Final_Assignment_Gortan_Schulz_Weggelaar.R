@@ -740,6 +740,7 @@ kableExtra::kbl(
   col.names = c("Outcome", "ATET", "$E[Y|T=1,D=1]$", "$E[Y(0,1)|T=1]$", "$E[Y(1,0)|T=1]$", "$E[Y(0,0)|T=1]$"),
   digits = 2,
   caption = "ATET Results",
+  label = "tab:final_atet_results",
   booktabs = TRUE,
   align = "lcccccc",
   escape = FALSE
@@ -808,7 +809,7 @@ data_post <- data %>%
 create_subpanel <- function(id, mtime_start, mtime_end, treat) {
   tibble(
     id              = id,
-    mtime           = seq(mtime_start, 24, 1),
+    mtime           = seq(1, 24, 1),
     gtime           = ifelse(treat > 1, mtime_start + (treat - 1), 0),
     employed        = ifelse(((mtime >= mtime_start) & (mtime < mtime_end)), 0, 1),
   )
@@ -827,18 +828,26 @@ att_gt(
   gname     = "gtime",
   idname    = "id",
   data      = event_study_panel,
-  control_group = "nevertreated"
+  control_group = "nevertreated",
+  base_period = "universal",
+  cores = 4
 ) -> est
 
-aggte(est, type = "dynamic", na.rm = T) -> es
+aggte(
+  est,   
+  type = "dynamic", 
+  na.rm = TRUE,
+  balance_e = 6,
+  min_e = -4,
+  max_e = 10
+  ) -> es
 
-broom::tidy(es) %>%
-  mutate(CI = paste0("$[", sprintf("%.3f", conf.low), " , ", sprintf("%.3f", conf.high), "]$")) %>%
-  select(t = event.time, coef = estimate, SE = std.error, CI) %>%
-  filter(t %in% -4:10) %>%
-  kableExtra::kbl("latex", digits = 3, escape = F, booktabs = T, linesep = "") %>%
-  writeLines("output/tables/final_event_study.tex")
-
+# broom::tidy(es) %>%
+#   mutate(CI = paste0("$[", sprintf("%.3f", conf.low), " , ", sprintf("%.3f", conf.high), "]$")) %>%
+#   select(t = event.time, coef = estimate, SE = std.error, CI) %>%
+#   filter(t %in% -4:10) %>%
+#   kableExtra::kbl("latex", digits = 3, escape = F, booktabs = T, linesep = "") %>%
+#   writeLines("output/tables/final_event_study.tex")
 
 ggdid(
   es,
@@ -868,10 +877,31 @@ est_controls <- att_gt(
   data      = event_study_panel %>%
                 left_join(controls, by = "id"),
   control_group = "nevertreated",
-  xformla   = ~ sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y
+  xformla   = ~ sex + marits + insured_earn + lastj_rate + child_subsidies + contr_2y,
+  base_period = "universal"
 )
 
-es_controls <- aggte(est_controls, type = "dynamic", na.rm = TRUE)
+event_study_panel %>% View()
+
+event_study_panel %>%
+  filter(gtime == 0) %>%
+  group_by(id)
+
+event_study_panel %>%
+  group_by(test = gtime == 0) %>%
+  summarise(
+    n = n(),
+    mean_employed = mean(employed, na.rm = TRUE)
+  )
+    
+
+es_controls <- aggte(
+  est_controls, 
+  type = "dynamic", 
+  na.rm = TRUE,
+  min_e = -4,
+  max_e = 18
+  )
 
 broom::tidy(es_controls) %>%
   mutate(CI = paste0("$[", sprintf("%.3f", conf.low), " , ", sprintf("%.3f", conf.high), "]$")) %>%
