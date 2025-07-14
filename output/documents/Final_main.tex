@@ -299,7 +299,7 @@ where \( Y_{it} \) is the outcome of interest for unit \( i \) at time \( t \), 
 
 We estimate the model using Ordinary Least Squares (OLS). Nevertheless, we believe that, for the reasons stated above, the common trends assumption does not hold, and so this estimate may not accurately estimate the ATT. Adding covariates does help to increase precision and help control for residual confounding. However, as stated above, we shy away from claiming that CT holds even conditional on the set of covariates. Also, we note that given the binary nature of the outcome variable, a logit or probit model would be more suitable when investigating impacts on re-employment probability.
 
-We find that the treated group has longer unemployment spells and are less likely to be employed after 12 months c.p. The average duration of spells increased from 2011 to 2015, and the chance of re-employment within 12 months decreased. The treatment parameter of interest is statistically and economically significant. We find that the program decreased the duration of unemployment spells by about 28 days c.p., irrespective of the model specification. We also find that it increased the probability of re-employment by 7 percentage points all else unchanged.
+Results are reported in Table~\ref{tab:final_ols_results_combined}. We find that the treated group has longer unemployment spells and are less likely to be employed after 12 months c.p. The average duration of spells increased from 2011 to 2015, and the chance of re-employment within 12 months decreased. The treatment parameter of interest is statistically and economically significant. We find that the program decreased the duration of unemployment spells by about 28 days c.p., irrespective of the model specification. We also find that it increased the probability of re-employment by 7 percentage points all else unchanged.
 
 \input{output/tables/final_ols_results_combined}
 
@@ -338,7 +338,7 @@ It is worth mentioning that \textit{age} alone is a good predictor of the propen
     \label{fig:prop_scores}
 \end{figure}
 
-The results of the 
+The results of the analysis are presented in Table~\ref{tab:final_atet_results}. We estimate that the program decreased unemployment duration by about 35 days c.p.\ and increased the probability of finding another job within 12 months by 0.05 percentage points. These findings differ from earlier findings based on OLS presented in Table~\ref{tab:final_ols_results}
 
 \input{output/tables/final_atet_results}
 
