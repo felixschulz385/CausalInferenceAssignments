@@ -797,6 +797,12 @@ data %>% group_by(id) %>% summarise(n = n()) %>% pull(n) %>% table()
 
 data %>% group_by(id) %>% summarise(pre = mean(date_start < as.Date("2013-01-01"))) %>% pull(pre) %>% table()
 
+# average start month of participation in the program
+data %>%
+  filter(post == 1) %>%
+  filter(treat > 0) %>%
+  summarize(mean(treat))
+
 # get data post inception of the program
 # get normalized monthly event time
 data_post <- data %>%
@@ -817,6 +823,7 @@ create_subpanel <- function(id, mtime_start, mtime_end, treat) {
     mtime           = seq(mtime_start, 24, 1),
     gtime           = ifelse(treat > 1, mtime_start + (treat - 1), 0),
     employed        = ifelse(((mtime >= mtime_start) & (mtime < mtime_end)), 0, 1),
+    reemployed        = ifelse((mtime > mtime_end), 1, 0),
   )
 }
 
